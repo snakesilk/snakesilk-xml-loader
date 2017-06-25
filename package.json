@@ -1,0 +1,33 @@
+{
+  "name": "snakesilk-xml-loader",
+  "version": "0.1.0",
+  "description": "Loader for SnakeSilk engine using XML as storage format.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha */**/*-test.js",
+    "test+coverage": "istanbul cover $(npm bin)/_mocha test/unit",
+    "upload-coverage": "codecov -f test/coverage/lcov.info --disable=gcov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snakesilk/snakesilk-xml-loader.git"
+  },
+  "author": "Pontus Persson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/snakesilk/snakesilk-xml-loader/issues"
+  },
+  "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
+  "dependencies": {
+    "snakesilk-engine": "git+https://github.com/snakesilk/snakesilk-engine.git#master",
+    "three": "0.70"
+  },
+  "devDependencies": {
+    "codecov": "^1.0.1",
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5",
+    "xmldom": "^0.1.27"
+  }
+}

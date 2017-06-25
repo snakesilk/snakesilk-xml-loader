@@ -113,7 +113,7 @@ class ObjectParser extends Parser
     _getConstructor(type, source)
     {
         if (type === 'character') {
-            const ref = require('../../object/character/' + source);
+            const ref = require('snakesilk-engine/engine/object/character/' + source);
             const Character = ref.default ? ref.default : ref;
             if (Character) {
                 return Character;

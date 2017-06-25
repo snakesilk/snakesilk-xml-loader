@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"@snakesilk/engine@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.1.2.tgz#792d366a21dee81ef065e60a2d37354b7e1ef43e"
+  dependencies:
+    three "0.70"
+
 abbrev@1, abbrev@1.0.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
@@ -669,12 +675,6 @@ sinon@^1.17.5:
     lolex "1.3.2"
     samsam "1.1.2"
     util ">=0.10.3 <1"
-
-"snakesilk-engine@git+https://github.com/snakesilk/snakesilk-engine.git#996e13b":
-  version "0.1.1"
-  resolved "git+https://github.com/snakesilk/snakesilk-engine.git#996e13b"
-  dependencies:
-    three "0.70"
 
 sntp@1.x.x:
   version "1.0.9"

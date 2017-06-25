@@ -71,7 +71,7 @@ class WeaponParser extends Parser
         var objectId = weaponNode.getAttribute('id');
         var source = weaponNode.getAttribute('source');
 
-        const constr = require('snakesilk-engine/src/object/weapon/' + source);
+        const constr = require('@snakesilk/engine/src/object/weapon/' + source);
         const weaponId = weaponNode.getAttribute('id');
         const directionNode = weaponNode.getElementsByTagName('directions')[0];
         var projectileNodes = weaponNode.getElementsByTagName('projectile');

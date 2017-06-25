@@ -1,6 +1,6 @@
 const SceneParser = require('./SceneParser');
-const StageSelect = require('snakesilk-engine/src/scene/StageSelect');
-const Util = require('snakesilk-engine/src/Util');
+const StageSelect = require('@snakesilk/engine/src/scene/StageSelect');
+const Util = require('@snakesilk/engine/src/Util');
 
 class StageSelectParser extends SceneParser
 {

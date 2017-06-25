@@ -1,4 +1,4 @@
-const {BitmapFont} = require('snakesilk-engine');
+const {BitmapFont} = require('@snakesilk/engine');
 
 const Parser = require('./Parser');
 const ObjectParser = require('./ObjectParser');

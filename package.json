@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/snakesilk/snakesilk-xml-loader.git"
   },
-  "author": "Pontus Persson",
+  "author": "Pontus Persson <pontus.alexander@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/snakesilk/snakesilk-xml-loader/issues"

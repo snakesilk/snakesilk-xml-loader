@@ -1,6 +1,6 @@
-const Loader = require('../../Loader');
-const GameParser = require('./GameParser');
+const Loader = require('snakesilk-engine/engine/Loader');
 
+const GameParser = require('./GameParser');
 const SceneParser = require('./SceneParser');
 const LevelParser = require('./LevelParser');
 const StageSelectParser = require('./StageSelectParser');

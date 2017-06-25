@@ -1,6 +1,6 @@
 const {Vector2} = require('three');
 const Parser = require('./Parser');
-const Solid = require('snakesilk-engine/engine/traits/Solid');
+const Solid = require('snakesilk-engine/src/traits/Solid');
 
 class TraitParser extends Parser
 {
@@ -57,7 +57,7 @@ class TraitParser extends Parser
     getConstructor(name)
     {
         const type = this.TRAIT_MAP[name];
-        const ref = require('snakesilk-engine/engine/traits/' + type);
+        const ref = require('snakesilk-engine/src/traits/' + type);
         const Trait = ref.default ? ref.default : ref;
         if (!Trait) {
             throw new TypeError(`Trait type "${name}" does not exist`);

@@ -1,8 +1,8 @@
 const THREE = require('three');
 
-const CanvasUtil = require('snakesilk-engine/engine/CanvasUtil');
-const Path = require('snakesilk-engine/engine/CameraPath');
-const Util = require('snakesilk-engine/engine/Util');
+const CanvasUtil = require('snakesilk-engine/src/CanvasUtil');
+const Path = require('snakesilk-engine/src/CameraPath');
+const Util = require('snakesilk-engine/src/Util');
 
 class Parser
 {

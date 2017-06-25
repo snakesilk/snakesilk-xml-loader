@@ -670,9 +670,9 @@ sinon@^1.17.5:
     samsam "1.1.2"
     util ">=0.10.3 <1"
 
-"snakesilk-engine@git+https://github.com/snakesilk/snakesilk-engine.git#master":
+"snakesilk-engine@git+https://github.com/snakesilk/snakesilk-engine.git#996e13b":
   version "0.1.1"
-  resolved "git+https://github.com/snakesilk/snakesilk-engine.git#f83275cf651f863c9ac55433d4d162f70d08b603"
+  resolved "git+https://github.com/snakesilk/snakesilk-engine.git#996e13b"
   dependencies:
     three "0.70"
 

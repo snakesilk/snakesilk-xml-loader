@@ -1,5 +1,5 @@
-const Level = require('snakesilk-engine/engine/scene/Level');
-const Spawner = require('snakesilk-engine/engine/object/Spawner');
+const Level = require('snakesilk-engine/src/scene/Level');
+const Spawner = require('snakesilk-engine/src/object/Spawner');
 
 const SceneParser = require('./SceneParser');
 

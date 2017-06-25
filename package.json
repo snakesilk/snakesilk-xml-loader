@@ -1,6 +1,6 @@
 {
   "name": "@snakesilk/xml-loader",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Loader for SnakeSilk engine using XML as storage format.",
   "main": "src/index.js",
   "scripts": {

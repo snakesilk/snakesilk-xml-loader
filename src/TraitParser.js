@@ -57,10 +57,10 @@ class TraitParser extends Parser
     getConstructor(name)
     {
         const type = this.TRAIT_MAP[name];
-        const ref = require('../../traits/' + type);
+        const ref = require('snakesilk-engine/engine/traits/' + type);
         const Trait = ref.default ? ref.default : ref;
         if (!Trait) {
-            throw new TypeError(`Trait type "${name}"" does not exist`);
+            throw new TypeError(`Trait type "${name}" does not exist`);
         }
         return Trait;
     }

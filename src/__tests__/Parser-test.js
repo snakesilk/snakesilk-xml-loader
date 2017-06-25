@@ -7,7 +7,7 @@ const xmlReader = require('./helpers/xmlreader');
 
 const World = require('snakesilk-engine/engine/World');
 const ResourceManager = require('snakesilk-engine/engine/ResourceManager');
-const Obj = require('snakesilk-engine/engine/Object');
+const Obj = require('snakesilk-engine/engine/Entity');
 
 const Parser = require('../Parser');
 const ObjectParser = require('../ObjectParser');

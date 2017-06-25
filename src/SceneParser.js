@@ -1,6 +1,6 @@
 const THREE = require('three');
 
-const Entity = require('snakesilk-engine/engine/Object');
+const Entity = require('snakesilk-engine/engine/Entity');
 const Scene = require('snakesilk-engine/engine/Scene');
 const Climbable = require('snakesilk-engine/engine/traits/Climbable');
 const DeathZone = require('snakesilk-engine/engine/traits/DeathZone');

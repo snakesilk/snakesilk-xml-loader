@@ -2,7 +2,7 @@ const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
 
 const Animation = require('snakesilk-engine/engine/Animation');
 const UVAnimator = require('snakesilk-engine/engine/animator/UV');
-const Entity = require('snakesilk-engine/engine/Object');
+const Entity = require('snakesilk-engine/engine/Entity');
 const UVCoords = require('snakesilk-engine/engine/UVCoords');
 
 const Parser = require('./Parser');

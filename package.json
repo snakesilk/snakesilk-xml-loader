@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha */**/*-test.js",
-    "test+coverage": "istanbul cover $(npm bin)/_mocha test/unit",
+    "test+coverage": "istanbul cover $(npm bin)/_mocha */**/*-test.js",
     "upload-coverage": "codecov -f test/coverage/lcov.info --disable=gcov"
   },
   "repository": {

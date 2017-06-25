@@ -1,4 +1,4 @@
-const {Loader} = require('snakesilk-engine');
+const {Loader} = require('@snakesilk/engine');
 
 const GameParser = require('./GameParser');
 const SceneParser = require('./SceneParser');

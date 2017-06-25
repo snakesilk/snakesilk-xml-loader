@@ -5,8 +5,8 @@ const fs = require('fs');
 const THREE = require('three');
 const xmlReader = require('./helpers/xmlreader');
 
-const {Entity, World} = require('snakesilk-engine');
-const ResourceManager = require('snakesilk-engine/src/ResourceManager');
+const {Entity, World} = require('@snakesilk/engine');
+const ResourceManager = require('@snakesilk/engine/src/ResourceManager');
 
 const Parser = require('../Parser');
 const ObjectParser = require('../ObjectParser');

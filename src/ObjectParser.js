@@ -1,5 +1,5 @@
 const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
-const {Animation, UVAnimator, Entity, UVCoords} = require('snakesilk-engine');
+const {Animation, UVAnimator, Entity, UVCoords} = require('@snakesilk/engine');
 
 const Parser = require('./Parser');
 const EventParser = require('./EventParser');
@@ -109,11 +109,8 @@ class ObjectParser extends Parser
     _getConstructor(type, source)
     {
         if (type === 'character') {
-            const ref = require('snakesilk-engine/src/object/character/' + source);
-            const Character = ref.default ? ref.default : ref;
-            if (Character) {
-                return Character;
-            }
+            const Character = require('@snakesilk/engine/src/object/character/' + source);
+            return Character;
         }
         return Entity;
     }

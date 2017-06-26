@@ -1,50 +1,46 @@
-const {Vector2} = require('three');
+const {Color, Vector2} = require('three');
+const {Traits} = require('@snakesilk/engine');
 const Parser = require('./Parser');
-const Solid = require('@snakesilk/engine/src/traits/Solid');
+
+ const TRAIT_MAP = {
+    'attach': 'Attach',
+    'climbable': 'Climbable',
+    'climber': 'Climber',
+    'contact-damage': 'ContactDamage',
+    'conveyor': 'Conveyor',
+    'death-spawn': 'DeathSpawn',
+    'death-zone': 'DeathZone',
+    'destructible': 'Destructible',
+    'disappearing': 'Disappearing',
+    'door': 'Door',
+    'elevator': 'Elevator',
+    'environment': 'Environment',
+    'fallaway': 'Fallaway',
+    'fixed-force': 'FixedForce',
+    'glow': 'Glow',
+    'headlight': 'Headlight',
+    'health': 'Health',
+    'invincibility': 'Invincibility',
+    'jump': 'Jump',
+    'lifetime': 'Lifetime',
+    'light': 'Light',
+    'light-control': 'LightControl',
+    'move': 'Move',
+    'physics': 'Physics',
+    'pickupable': 'Pickupable',
+    'projectile': 'Projectile',
+    'rotate': 'Rotate',
+    'solid': 'Solid',
+    'spawn': 'Spawn',
+    'stun': 'Stun',
+    'teleport': 'Teleport',
+    'translate': 'Translate',
+    'translating': 'Translating',
+    'weapon': 'Weapon',
+};
 
 class TraitParser extends Parser
 {
-    constructor(loader)
-    {
-        super(loader);
-        this.TRAIT_MAP = {
-            'attach': 'Attach',
-            'climbable': 'Climbable',
-            'climber': 'Climber',
-            'contact-damage': 'ContactDamage',
-            'conveyor': 'Conveyor',
-            'death-spawn': 'DeathSpawn',
-            'death-zone': 'DeathZone',
-            'destructible': 'Destructible',
-            'disappearing': 'Disappearing',
-            'door': 'Door',
-            'elevator': 'Elevator',
-            'emittable': 'Emittable',
-            'environment': 'Environment',
-            'fallaway': 'Fallaway',
-            'fixed-force': 'FixedForce',
-            'glow': 'Glow',
-            'headlight': 'Headlight',
-            'health': 'Health',
-            'invincibility': 'Invincibility',
-            'jump': 'Jump',
-            'lifetime': 'Lifetime',
-            'light': 'Light',
-            'light-control': 'LightControl',
-            'move': 'Move',
-            'physics': 'Physics',
-            'pickupable': 'Pickupable',
-            'projectile': 'Projectile',
-            'rotate': 'Rotate',
-            'solid': 'Solid',
-            'spawn': 'Spawn',
-            'stun': 'Stun',
-            'teleport': 'Teleport',
-            'translate': 'Translate',
-            'translating': 'Translating',
-            'weapon': 'Weapon',
-        };
-    }
     createConstructor(blueprint)
     {
         const constructor = this.createObject(blueprint.name, blueprint.constr, function blueprintConstructor() {
@@ -56,8 +52,8 @@ class TraitParser extends Parser
     }
     getConstructor(name)
     {
-        const type = this.TRAIT_MAP[name];
-        const Trait = require('@snakesilk/engine/src/traits/' + type);
+        const traitName = TRAIT_MAP[name];
+        const Trait = Traits[traitName];
         if (!Trait) {
             throw new TypeError(`Trait type "${name}" does not exist`);
         }
@@ -67,7 +63,7 @@ class TraitParser extends Parser
     {
         const name = this.getAttr(node, 'name');
         if (name === 'destructible') {
-            const affectorObjectNodes = node.querySelectorAll(':scope > affectors > object');
+            const affectorObjectNodes = node.querySelectorAll('affectors > object');
             const ids = this.getArray(affectorObjectNodes, 'id');
             return function setup(trait) {
                 ids.forEach(id => {
@@ -76,10 +72,10 @@ class TraitParser extends Parser
             };
         } else if (name === 'door') {
             const directionNode = node.getElementsByTagName('direction')[0];
-            let direction;
-            if (directionNode) {
-                direction = this.getVector2(directionNode);
-            }
+            const direction = directionNode
+                ? this.getVector2(directionNode)
+                : undefined;
+
             const oneWay = this.getBool(node, 'one-way');
             return function setup(trait) {
                 if (direction) {
@@ -126,7 +122,7 @@ class TraitParser extends Parser
                 trait.force.copy(force);
             };
         } else if (name === 'light-control') {
-            const color = this.getColor(node);
+            const color = this.getColor(node) || new Color(1, 1, 1);
             return function setup(trait) {
                 trait.color.copy(color);
             };
@@ -190,7 +186,7 @@ class TraitParser extends Parser
                 });
             };
         } else if (name === 'translate') {
-            const velocity = this.getVector2(node);
+            const velocity = this.getVector2(node) || new Vector2();
             return function setup(trait) {
                 trait.velocity.copy(velocity);
             };
@@ -227,7 +223,7 @@ class TraitParser extends Parser
         const attack = node.getAttribute(attr);
         if (attack) {
             const surfaces = [];
-            const SIDES = Solid.SIDES;
+            const SIDES = Traits.Solid.SIDES;
             const map = {
                 'top': SIDES.TOP,
                 'bottom': SIDES.BOTTOM,

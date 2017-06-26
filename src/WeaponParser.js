@@ -1,4 +1,5 @@
 const {Vector2} = require('three');
+const {Weapons} = require('@snakesilk/engine');
 const Parser = require('./Parser');
 
 class WeaponParser extends Parser
@@ -71,7 +72,7 @@ class WeaponParser extends Parser
         var objectId = weaponNode.getAttribute('id');
         var source = weaponNode.getAttribute('source');
 
-        const constr = require('@snakesilk/engine/src/object/weapon/' + source);
+        const Weapon = Weapons[source];
         const weaponId = weaponNode.getAttribute('id');
         const directionNode = weaponNode.getElementsByTagName('directions')[0];
         var projectileNodes = weaponNode.getElementsByTagName('projectile');

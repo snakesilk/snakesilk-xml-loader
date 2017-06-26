@@ -1,18 +1,24 @@
 const fs = require('fs');
-const DOMParser = require('xmldom').DOMParser;
+const {jsdom} = require('node-jsdom');
+
+function createDoc(xml) {
+    const doc = jsdom(xml, {
+        parsingMode: 'xml',
+    });
+    return doc;
+}
 
 function createNode(xml) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xml, 'text/xml');
-  return doc;
+    return createDoc(xml).childNodes[0];
 }
 
 function readXml(file) {
-  const xml = fs.readFileSync(file, 'utf8');
-  return createNode(xml);
+    const xml = fs.readFileSync(file, 'utf8');
+    return createNode(xml);
 }
 
 module.exports = {
-  createNode: createNode,
-  readXml: readXml,
+    createDoc,
+    createNode,
+    readXml,
 };

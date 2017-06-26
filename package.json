@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
   "dependencies": {
-    "@snakesilk/engine": "^0.1.2"
+    "@snakesilk/engine": "git+https://github.com/snakesilk/snakesilk-engine.git#4c410bfb4ca78f0a4036692ff44aae73b01ccbff"
   },
   "devDependencies": {
     "codecov": "^1.0.1",

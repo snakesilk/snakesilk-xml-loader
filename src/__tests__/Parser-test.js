@@ -6,7 +6,6 @@ const THREE = require('three');
 const {createNode} = require('./helpers/xmlreader');
 
 const {Entity, World} = require('@snakesilk/engine');
-const ResourceManager = require('@snakesilk/engine/src/ResourceManager');
 
 const Parser = require('../Parser');
 const ObjectParser = require('../ObjectParser');
@@ -14,13 +13,7 @@ const LevelParser = require('../LevelParser');
 const TraitParser = require('../TraitParser');
 
 describe('Parser', function() {
-  let loaderMock;
-
   beforeEach(function() {
-    loaderMock = {
-      resource: new ResourceManager(),
-    };
-
     global.Image = sinon.spy(function() {
       this.src = '';
       this.onload = undefined;

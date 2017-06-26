@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
   "dependencies": {
-    "@snakesilk/engine": "^0.2.0"
+    "@snakesilk/engine": "^0.2.2"
   },
   "devDependencies": {
     "babel-cli": "6",

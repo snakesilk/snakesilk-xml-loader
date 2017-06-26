@@ -1,10 +1,6 @@
-const THREE = require('three');
+const {Vector3} = require('three');
 
-const {Entity, Scene} = require('@snakesilk/engine');
-
-const Climbable = require('@snakesilk/engine/src/traits/Climbable');
-const DeathZone = require('@snakesilk/engine/src/traits/DeathZone');
-const Solid = require('@snakesilk/engine/src/traits/Solid');
+const {Entity, Scene, Traits} = require('@snakesilk/engine');
 
 const Parser = require('./Parser');
 const EventParser = require('./EventParser');
@@ -18,7 +14,7 @@ class SceneParser extends Parser
     {
         super(loader);
 
-        this.DEFAULT_POS = new THREE.Vector3(0, 0, 0);
+        this.DEFAULT_POS = new Vector3(0, 0, 0);
         this.BEHAVIOR_MAP = {
             'climbables': this._createClimbable,
             'deathzones': this._createDeathZone,
@@ -34,18 +30,18 @@ class SceneParser extends Parser
     _createClimbable()
     {
         const object = new Entity();
-        object.applyTrait(new Climbable);
+        object.applyTrait(new Traits.Climbable());
         return object;
     }
     _createDeathZone()
     {
         const object = new Entity();
-        object.applyTrait(new DeathZone);
+        object.applyTrait(new Traits.DeathZone());
         return object;
     }
     _createSolid() {
         const object = new Entity();
-        const solid = new Solid;
+        const solid = new Traits.Solid();
         solid.fixed = true;
         solid.obstructs = true;
         object.applyTrait(solid);

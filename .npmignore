@@ -1,0 +1,8 @@
+coverage/
+node_modules/
+scripts/
+.babelrc
+.gitignore
+.istanbul.yml
+.travis.yml
+yarn.lock

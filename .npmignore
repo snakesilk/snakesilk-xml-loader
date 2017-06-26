@@ -4,6 +4,7 @@ scripts/
 src/
 .babelrc
 .gitignore
+.npmignore
 .istanbul.yml
 .travis.yml
 yarn.lock

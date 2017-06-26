@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const fs = require('fs');
 
 const THREE = require('three');
-const xmlReader = require('./helpers/xmlreader');
+const {createNode} = require('./helpers/xmlreader');
 
 const {Entity, World} = require('@snakesilk/engine');
 const ResourceManager = require('@snakesilk/engine/src/ResourceManager');
@@ -12,14 +12,6 @@ const Parser = require('../Parser');
 const ObjectParser = require('../ObjectParser');
 const LevelParser = require('../LevelParser');
 const TraitParser = require('../TraitParser');
-
-function createNode(x) {
-  return xmlReader.createNode(x).childNodes[0];
-}
-
-function getNode(name) {
-  return xmlReader.readXml(__dirname + '/fixtures/' + name + '.xml', 'utf8').childNodes[0];
-}
 
 describe('Parser', function() {
   let loaderMock;

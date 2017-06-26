@@ -141,7 +141,7 @@ class ObjectParser extends Parser
     }
     _parseAnimations()
     {
-        const nodes = this._node.querySelectorAll(':scope > animations > animation');
+        const nodes = this._node.querySelectorAll('animations > animation');
 
         const animations = {
             __default: undefined,
@@ -220,7 +220,7 @@ class ObjectParser extends Parser
     }
     _parseObjects()
     {
-        const objectNodes = this._node.querySelectorAll(':scope > object');
+        const objectNodes = this._node.querySelectorAll('object');
 
         const tasks = [];
         const objects = {};
@@ -400,7 +400,7 @@ class ObjectParser extends Parser
     }
     _parseObjectEvents(objectNode)
     {
-        const eventsNode = objectNode.querySelector(':scope > events');
+        const eventsNode = objectNode.querySelector('events');
         if (eventsNode) {
             const parser = new EventParser(this.loader, eventsNode);
             return parser.getEvents();
@@ -425,7 +425,7 @@ class ObjectParser extends Parser
     _parseObjectSequences(objectNode)
     {
         const parser = new SequenceParser();
-        const node = objectNode.querySelector(':scope > sequences');
+        const node = objectNode.querySelector('sequences');
         if (node) {
             const sequences = parser.getSequences(node);
             return Promise.resolve(sequences);
@@ -435,7 +435,7 @@ class ObjectParser extends Parser
     }
     _parseTextures()
     {
-        const nodes = this._node.querySelectorAll(':scope > textures > texture');
+        const nodes = this._node.querySelectorAll('textures > texture');
         const textures = {
             __default: undefined,
         };

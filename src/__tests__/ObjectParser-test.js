@@ -1,8 +1,52 @@
 const expect = require('expect.js');
 const sinon = require('sinon');
-const fs = require('fs');
+const {createNode} = require('./helpers/xmlreader');
 
+const {Loader, Objects} = require('@snakesilk/engine');
 const ObjectParser = require('../ObjectParser');
+
+describe('ObjectParser', function() {
+    let parser, Entity;
+
+    [
+        'Airman',
+        'Crashman',
+        'Flashman',
+        'Heatman',
+        'Megaman',
+        'Metalman',
+
+        'ChangkeyMaker',
+        'Shotman',
+        'SniperArmor',
+        'SniperJoe',
+        'Telly',
+    ].forEach(name => {
+        const id = name + '-id';
+        const xmlString = `<objects>
+             <object type="character" source="${name}" id="${id}">
+        </objects>`;
+
+        describe(`when parsing ${xmlString}`, () => {
+            beforeEach(() => {
+                const node = createNode(xmlString);
+                parser = new ObjectParser(new Loader(), node);
+                return parser.getObjects()
+                    .then(objects => {
+                        Entity = objects[id].constructor;
+                    });
+            });
+
+            it(`produces a ${name} entity`, () => {
+              expect(Entity).to.be.a(Function);
+            });
+
+            it.skip(`produces a ${name} entity`, () => {
+              expect(new Entity()).to.be.a(Objects[name]);
+            });
+        });
+    });
+});
 
 describe.skip('ObjectParser', function() {
   let loaderMock;

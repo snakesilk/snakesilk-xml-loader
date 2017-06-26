@@ -1,5 +1,5 @@
 const {Vector2} = require('three');
-const {Weapons} = require('@snakesilk/engine');
+const {Objects: Weapons} = require('@snakesilk/engine');
 const Parser = require('./Parser');
 
 class WeaponParser extends Parser
@@ -79,7 +79,7 @@ class WeaponParser extends Parser
 
         var blueprint = {
             id: weaponId,
-            constr: constr,
+            constr: Weapon,
             ammo: this.getFloat(weaponNode, 'ammo') || null,
             code: this.getAttr(weaponNode, 'code'),
             coolDown: this.getFloat(weaponNode, 'cool-down') || 0,

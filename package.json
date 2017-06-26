@@ -2,10 +2,11 @@
   "name": "@snakesilk/xml-loader",
   "version": "0.1.1",
   "description": "Loader for SnakeSilk engine using XML as storage format.",
-  "main": "src/index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "mocha './src/**/*-test.js'",
     "test+coverage": "istanbul cover $(npm bin)/_mocha './src/**/*-test.js'",
+    "prepack": "./scripts/prepack.sh",
     "upload-coverage": "codecov -f test/coverage/lcov.info --disable=gcov"
   },
   "repository": {
@@ -19,9 +20,11 @@
   },
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
   "dependencies": {
-    "@snakesilk/engine": "git+https://github.com/snakesilk/snakesilk-engine.git#4c410bfb4ca78f0a4036692ff44aae73b01ccbff"
+    "@snakesilk/engine": "^0.2.0"
   },
   "devDependencies": {
+    "babel-cli": "6",
+    "babel-preset-es2015": "6",
     "codecov": "^1.0.1",
     "expect.js": "^0.3.1",
     "istanbul": "^0.4.5",

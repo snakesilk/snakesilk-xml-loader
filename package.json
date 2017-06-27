@@ -9,7 +9,7 @@
     "test+coverage": "istanbul cover $(npm bin)/_mocha './src/**/*-test.js'",
     "package": "npm run build && npm pack",
     "publish+npm": "npm run build && npm publish",
-    "upload-coverage": "codecov -f test/coverage/lcov.info --disable=gcov"
+    "upload-coverage": "codecov -f coverage/lcov.info --disable=gcov"
   },
   "repository": {
     "type": "git",
@@ -21,10 +21,8 @@
     "url": "https://github.com/snakesilk/snakesilk-xml-loader/issues"
   },
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
-  "dependencies": {
-    "@snakesilk/engine": "^0.2.2"
-  },
   "devDependencies": {
+    "@snakesilk/engine": "^0.2.2",
     "babel-cli": "6",
     "babel-preset-es2015": "6",
     "codecov": "^1.0.1",

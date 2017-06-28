@@ -10,7 +10,7 @@ function ensure(node, selector) {
 
 function children(parent, selector) {
     const next = [];
-    for (let i = 0; node = parent.children[i]; ++i) {
+    for (let i = 0, node; node = parent.children[i]; ++i) {
         if (node.matches(selector)) {
             next.push(node);
         }

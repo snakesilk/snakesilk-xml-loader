@@ -2,6 +2,7 @@ const {Vector3} = require('three');
 
 const {Entity, Scene, Traits} = require('@snakesilk/engine');
 
+const {children, find, ensure} = require('./util/traverse');
 const Parser = require('./Parser');
 const CameraParser = require('./CameraParser');
 const EventParser = require('./EventParser');
@@ -13,6 +14,8 @@ class SceneParser extends Parser
 {
     constructor(loader, node)
     {
+        ensure(node, 'scene');
+
         super(loader);
 
         this.DEFAULT_POS = new Vector3(0, 0, 0);
@@ -102,20 +105,17 @@ class SceneParser extends Parser
     }
     _parse()
     {
-        if (this._node.tagName !== 'scene') {
-            throw new TypeError('Node not <scene>');
-        }
-
         this._scene = new Scene();
 
-        this._parseAudio();
-        this._parseCamera();
-        this._parseEvents();
-        this._parseBehaviors();
-        this._parseGravity();
-        this._parseSequences();
-
-        return this._parseObjects().then(() => {
+        return Promise.all([
+            this._parseAudio(),
+            this._parseCamera(),
+            this._parseEvents(),
+            this._parseObjects(),
+            this._parseBehaviors(),
+            this._parseGravity(),
+            this._parseSequences(),
+        ]).then(() => {
             return this._parseLayout();
         }).then(() => {
             return this.loader.resourceLoader.complete();
@@ -126,7 +126,7 @@ class SceneParser extends Parser
     _parseAudio()
     {
         const scene = this._scene;
-        const nodes = this._node.querySelectorAll(':scope > audio > *');
+        const nodes = find(this._node, 'audio > *');
         const tasks = [];
         for (let node, i = 0; node = nodes[i++];) {
             const id = this.getAttr(node, 'id');
@@ -139,7 +139,7 @@ class SceneParser extends Parser
     }
     _parseBehaviors()
     {
-        const nodes = this._node.querySelectorAll(':scope > layout > behaviors > * > rect');
+        const nodes = find(this._node, 'layout > behaviors > * > rect');
         const world = this._scene.world;
         for (let node, i = 0; node = nodes[i]; ++i) {
             const object = this.getBehavior(node);
@@ -165,7 +165,7 @@ class SceneParser extends Parser
     {
         this._parseGlobalEvents();
 
-        const node = this._node.querySelector(':scope > events');
+        const node = children(this._node, 'events')[0];
         if (!node) {
             return Promise.resolve();
         }
@@ -180,7 +180,7 @@ class SceneParser extends Parser
     }
     _parseGlobalEvents()
     {
-        const eventsNode = this._node.querySelector(':scope > events');
+        const eventsNode = children(this._node, 'events')[0];
         if (!eventsNode) {
             return;
         }
@@ -203,7 +203,7 @@ class SceneParser extends Parser
     }
     _parseGravity()
     {
-        const node = this._node.getElementsByTagName('gravity')[0];
+        const node = children(this._node, 'gravity')[0];
         if (node) {
             const gravity = this.getVector2(node);
             this._scene.world.gravityForce.copy(gravity);
@@ -212,7 +212,7 @@ class SceneParser extends Parser
     }
     _parseLayout()
     {
-        const objectNodes = this._node.querySelectorAll(':scope > layout > objects > object');
+        const objectNodes = find(this._node, 'layout > objects > object');
         const world = this._scene.world;
         for (let objectNode, i = 0; objectNode = objectNodes[i]; ++i) {
             const layoutObject = this._parseLayoutObject(objectNode);
@@ -224,7 +224,7 @@ class SceneParser extends Parser
     _parseLayoutObject(node)
     {
         const objectId = node.getAttribute('id');
-        const instanceId = node.getAttribute('instance');
+        const instanceId = node.getAttribute('instance-id');
         const object = this._getObject(objectId);
         const instance = new object.constructor;
         instance.id = instanceId;
@@ -260,7 +260,7 @@ class SceneParser extends Parser
     }
     _parseObjects()
     {
-        const nodes = this._node.querySelectorAll(':scope > objects');
+        const nodes = children(this._node, 'objects');
         if (!nodes.length) {
             return Promise.resolve();
         }
@@ -279,7 +279,7 @@ class SceneParser extends Parser
     _parseSequences()
     {
         const parser = new SequenceParser();
-        const node = this._node.querySelector(':scope > sequences');
+        const node = children(this._node, 'sequences')[0];
         if (node) {
             const seq = this._scene.sequencer;
             parser.getSequences(node).forEach(item => {

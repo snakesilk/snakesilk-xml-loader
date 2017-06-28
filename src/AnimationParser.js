@@ -1,37 +1,9 @@
 const {Vector2} = require('three');
 const {Animation, UVCoords} = require('@snakesilk/engine');
 
-const {closest} = require('./traverse')
+const {closest} = require('./util/traverse')
+const LoopTree = require('./util/LoopTree');
 const Parser = require('./Parser');
-
-class LoopTree
-{
-    constructor(frames = [], loops = 1)
-    {
-        this.frames = frames;
-        this.loops = loops;
-    }
-
-    squash() {
-        return flatten(this);
-    }
-}
-
-function flatten(loopTree) {
-  const flat = loopTree.frames.reduce((flat, frame) => {
-    if (frame instanceof LoopTree) {
-      return flat.concat(flatten(frame));
-    }
-    return flat.concat([frame]);
-  }, []);
-
-  const all = [];
-  for (let i = 0; i < loopTree.loops; ++i) {
-    all.push(...flat);
-  }
-
-  return all;
-}
 
 class AnimationParser extends Parser
 {

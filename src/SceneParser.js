@@ -111,7 +111,6 @@ class SceneParser extends Parser
         this._parseCamera();
         this._parseEvents();
         this._parseBehaviors();
-        this._parseCamera();
         this._parseGravity();
         this._parseSequences();
 

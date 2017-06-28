@@ -2,6 +2,7 @@ const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
 const {Animation, UVAnimator, Entity, Objects, UVCoords} = require('@snakesilk/engine');
 
 const Parser = require('./Parser');
+const AnimationParser = require('./AnimationParser');
 const EventParser = require('./EventParser');
 const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
@@ -142,13 +143,16 @@ class ObjectParser extends Parser
     _parseAnimations()
     {
         const nodes = this._node.querySelectorAll('animations > animation');
+        const animationParser = new AnimationParser();
 
         const animations = {
             __default: undefined,
         };
 
         for (let i = 0, node; node = nodes[i++];) {
-            const animation = this._parseAnimation(node);
+            const textureId = node.parentNode.getAttribute('texture');
+            const texture = this._getTexture(textureId);
+            const animation = animationParser.parseAnimation(node, texture.size);
             animations[animation.id || '__default'] = animation;
             if (animations['__default'] === undefined) {
                 animations['__default'] = animation;
@@ -156,43 +160,6 @@ class ObjectParser extends Parser
         }
 
         return Promise.resolve(animations);
-    }
-    _parseAnimation(animationNode)
-    {
-        const textureId = animationNode.parentNode.getAttribute('texture');
-        const texture = this._getTexture(textureId);
-
-        const id = animationNode.getAttribute('id');
-        const group = animationNode.getAttribute('group') || undefined;
-        const animation = new Animation(id, group);
-        const frameNodes = animationNode.getElementsByTagName('frame');
-        let loop = [];
-        for (let i = 0, frameNode; frameNode = frameNodes[i++];) {
-            const offset = this.getVector2(frameNode, 'x', 'y');
-            const size = this.getVector2(frameNode, 'w', 'h') ||
-                         this.getVector2(frameNode.parentNode, 'w', 'h') ||
-                         this.getVector2(frameNode.parentNode.parentNode, 'w', 'h');
-            const uvMap = new UVCoords(offset, size, texture.size);
-            const duration = this.getFloat(frameNode, 'duration') || undefined;
-            animation.addFrame(uvMap, duration);
-
-            const parent = frameNode.parentNode;
-            if (parent.tagName === 'loop') {
-                loop.push([uvMap, duration]);
-                const next = frameNodes[i+1] && frameNodes[i+1].parentNode;
-                if (parent !== next) {
-                    let loopCount = parseInt(parent.getAttribute('count'), 10) || 1;
-                    while (--loopCount) {
-                        for (let j = 0; j < loop.length; ++j) {
-                            animation.addFrame(loop[j][0], loop[j][1]);
-                        }
-                    }
-                    loop = [];
-                }
-            }
-        }
-
-        return animation;
     }
     _parseFace(faceNode)
     {

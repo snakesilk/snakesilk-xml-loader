@@ -1,4 +1,8 @@
 <scene>
+    <audio>
+        <music src="./intro/intro.ogg" id="intro"/>
+    </audio>
+
     <checkpoints>
         <checkpoint x="136" y="-165" z="0"/>
         <checkpoint x="1920" y="-661" z="0"/>
@@ -174,6 +178,7 @@
                 <frame x="91" y="73" w="16" h="16"/>
             </animation>
         </animations>
+
         <object id="pho-block">
             <geometry type="plane" w="16" h="22" w-segments="1" h-segments="1">
                 <face animation="pho"/>
@@ -185,6 +190,7 @@
                 <trait name="solid"/>
             </traits>
         </object>
+
         <object id="ironwall">
             <geometry type="plane" w="16" h="32" w-segments="1" h-segments="2">
                 <face animation="destructible-wall">
@@ -199,6 +205,7 @@
                 <trait name="destructible"/>
             </traits>
         </object>
+
         <object id="door">
             <geometry type="plane" w="32" h="64" w-segments="2" h-segments="4">
                 <face animation="door">
@@ -214,6 +221,7 @@
                 </trait>
             </traits>
         </object>
+
         <object id="test">
             <geometry type="plane" w="64" h="64" w-segments="8" h-segments="8">
                 <face animation="door" index="[22,24]">
@@ -223,11 +231,13 @@
                 </face>
             </geometry>
         </object>
+
         <object id="json-index-only">
             <geometry type="plane" w="64" h="64" w-segments="8" h-segments="8">
                 <face animation="door" index="[0,1,2,3,4,100,112]"/>
             </geometry>
         </object>
+
         <object id="range-index-star">
             <geometry type="plane" w="64" h="64" w-segments="4" h-segments="4">
                 <face animation="door">
@@ -235,9 +245,7 @@
                 </face>
             </geometry>
         </object>
-        <!--
-        <model id="dr-wily-sign"><geometry type="plane" w="32" h="32" /><face animation="dr-wily-sign"></model>
-        -->
+
         <object id="upper-level">
             <geometry type="plane" w="2048" h="240" w-segments="128" h-segments="15">
                 <face animation="darkness">

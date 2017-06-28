@@ -2,113 +2,99 @@ const expect = require('expect.js');
 const sinon = require('sinon');
 const fs = require('fs');
 
-const SceneParser = require('../SceneParser');
-const LevelParser = require('../LevelParser');
+const mocks = require('@snakesilk/testing/mocks');
+const {readXMLFile} = require('@snakesilk/testing/xml');
 
-describe.skip('SceneParser', function() {
-  let loaderMock;
+const THREE = require('three');
+const {Game, Loader, World} = require('@snakesilk/engine');
+const SceneParser = require('../SceneParser');
+
+describe('SceneParser', function() {
+  let parser, node;
+
+  before(() => {
+    node = readXMLFile(__dirname + '/fixtures/scene.xml').childNodes[0];
+  });
 
   beforeEach(function() {
-    loaderMock = {
-      resource: new ResourceManager(),
-    };
+    mocks.AudioContext.mock();
+    mocks.Image.mock();
 
-    global.Image = sinon.spy(function() {
-      this.src = '';
-      this.onload = undefined;
+    const loader = new Loader();
+    sinon.stub(loader.resourceLoader, 'loadImage', () => {
+      return Promise.resolve(new mocks.Canvas())
     });
+
+    sinon.stub(World.prototype, 'simulateTime');
+
+    parser = new SceneParser(loader, node);
   });
 
   afterEach(function() {
-    delete global.Image;
+    mocks.AudioContext.restore();
+    mocks.Image.restore();
+
+    World.prototype.simulateTime.restore();
   });
 
-  let level;
-  it('should parse a level', function(done) {
-    const resourceMock = new Engine.ResourceManager();
-    resourceMock.get = sinon.spy(function(type, id) {
-      if (type === 'font') {
-        return function() {
-          return {
-            createMesh: sinon.spy(),
-          }
-        };
-      } else {
-        return Obj;
-      }
-    });
-    const game = new Game();
-    game.player = new Engine.Player();
-    const sceneNode = getNode('level');
-    const parser = new LevelParser({
-      game: game,
-      resource: resourceMock,
-    });
-    parser.parse(sceneNode)
-    .then(function(_level) {
-      level = _level;
-      expect(level).to.be.a(Engine.Scene);
-      done();
-    })
-    .catch(done);
-  });
+  describe('when instantiated', () => {
+    describe('#getScene', () => {
+      let scene;
 
-  it('should create objects with valid positions', function() {
-    level.world.objects.forEach(function(object) {
-      expect(object.position).to.be.a(THREE.Vector3);
-      expect(object.position.x).to.be.a('number');
-      expect(object.position.y).to.be.a('number');
-      expect(object.position.z).to.be.a('number');
-      if (object.model) {
+      beforeEach(() => {
+        return parser.getScene().then(_s => {scene = _s});
+      });
+
+      it('creates objects with valid positions', function() {
+        scene.world.objects.forEach(function(object) {
+          expect(object.position).to.be.a(THREE.Vector3);
+          expect(object.position.x).to.be.a('number');
+          expect(object.position.y).to.be.a('number');
+          expect(object.position.z).to.be.a('number');
+        });
+      });
+
+      it.skip('creates sane textures', () => {
         expect(object.model.material.map).to.be.a(THREE.Texture);
-      }
-    });
-  });
+      });
 
-  it('should not put any objects in scene without texture ', function() {
-    level.world.scene.children.forEach(function(mesh) {
-      if (mesh.material && !mesh.material.map) {
-        console.error('Mesh missing texture', mesh);
-      }
-    });
-  });
+      it('should not put any objects in scene without texture ', function() {
+        scene.world.scene.children.forEach(function(mesh) {
+          if (mesh.material && !mesh.material.map) {
+            console.error('Mesh missing texture', mesh);
+          }
+        });
+      });
 
-  context('Object Parsing', function() {
-    let object;
+      describe('parsed Camera', function() {
+        it('have smoothing', function() {
+          expect(scene.camera.smoothing).to.equal(13.5);
+        });
 
-    it('should name object', function() {
-      object = level.world.getObject('test');
-      expect(object.name).to.equal('test');
-    });
+        it('have paths', function() {
+          const paths = scene.camera.paths;
+          expect(paths).to.have.length(3);
+          expect(paths[0].window[0]).to.eql({x: 0, y: -208, z: 0});
+          expect(paths[0].window[1]).to.eql({x: 2048, y: 0, z: 0});
+          expect(paths[0].constraint[0]).to.eql({x: 180, y: -120, z: 150});
+          expect(paths[0].constraint[1]).to.eql({x: 1920, y: -120, z: 150});
+        });
+      });
 
-    it('should take out face indices properly', function() {
-      object = level.world.getObject('json-index-only');
-      expect(object.animators[0].indices).to.eql([0, 1, 2, 3, 4, 100, 112]);
-      object = level.world.getObject('range-index-star');
-      expect(object.animators[0].indices).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
-    });
-  });
+      describe('Object Parsing', function() {
+        it('should name object', function() {
+          const object = scene.world.getObject('my-test-object');
+          expect(object.id).to.equal('my-test-object');
+          expect(object.name).to.equal('test');
+        });
+      });
 
-  it('should parse checkpoints', function() {
-    expect(level.checkPoints).to.have.length(3);
-    expect(level.checkPoints[0]).to.eql({pos: {x: 136, y: -165}, radius: 100});
-    expect(level.checkPoints[1]).to.eql({pos: {x: 1920, y: -661}, radius: 100});
-    expect(level.checkPoints[2]).to.eql({pos: { x: 4736, y: -1109}, radius: 13});
-  });
-
-  context('Camera', function() {
-    it('should have smoothing', function() {
-      expect(level.world.camera.smoothing).to.be.a('number');
-      expect(level.world.camera.smoothing).to.equal(13.5);
-    });
-
-    it('should have paths', function() {
-      const paths = level.world.camera.paths;
-      expect(paths).to.have.length(3);
-      expect(paths[0].window[0]).to.eql({x: 0, y: -208, z: 0});
-      expect(paths[0].window[1]).to.eql({x: 2048, y: 0, z: 0});
-      expect(paths[0].constraint[0]).to.eql({x: 180, y: -120, z: 150});
-      expect(paths[0].constraint[1]).to.eql({x: 1920, y: -120, z: 150});
+      it.skip('should parse checkpoints', function() {
+        expect(scene.checkPoints).to.have.length(3);
+        expect(scene.checkPoints[0]).to.eql({pos: {x: 136, y: -165}, radius: 100});
+        expect(scene.checkPoints[1]).to.eql({pos: {x: 1920, y: -661}, radius: 100});
+        expect(scene.checkPoints[2]).to.eql({pos: { x: 4736, y: -1109}, radius: 13});
+      });
     });
   });
 });

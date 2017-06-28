@@ -1,12 +1,13 @@
 const expect = require('expect.js');
 const sinon = require('sinon');
-const {createNode} = require('@snakesilk/testing/xml');
+const mocks = require('@snakesilk/testing/mocks');
+const {createNode, readXMLFile} = require('@snakesilk/testing/xml');
 
-const {Loader, Objects} = require('@snakesilk/engine');
+const {Animation, Entity, Loader, Objects, UVCoords} = require('@snakesilk/engine');
 const ObjectParser = require('../ObjectParser');
 
-describe('ObjectParser', function() {
-    let parser, Entity;
+describe('ObjectParser', () => {
+    let parser;
 
     [
         'Airman',
@@ -28,6 +29,8 @@ describe('ObjectParser', function() {
         </objects>`;
 
         describe(`when parsing ${xmlString}`, () => {
+            let Entity;
+
             beforeEach(() => {
                 const node = createNode(xmlString);
                 parser = new ObjectParser(new Loader(), node);
@@ -48,215 +51,134 @@ describe('ObjectParser', function() {
     });
 });
 
-describe.skip('ObjectParser', function() {
-  let loaderMock;
+describe('ObjectParser', () => {
+  beforeEach(() => {
 
-  beforeEach(function() {
-    loaderMock = {
-      resource: new ResourceManager(),
-    };
-
-    global.Image = sinon.spy(function() {
-      this.src = '';
-      this.onload = undefined;
-    });
   });
 
   afterEach(function() {
-    delete global.Image;
+
   });
 
-  describe('#parse', function() {
-    let objects, character;
+  describe('#getObjects', () => {
+    let node, objects;
 
-    it('should return an object indexed by object names', function() {
-      const objectsNode = getNode('character');
-      const parser = new ObjectParser(loaderMock);
-      objects = parser.parse(objectsNode);
+    before(() => {
+      node = readXMLFile(__dirname + '/fixtures/character.xml').childNodes[0];
+    });
+
+    beforeEach(() => {
+      mocks.Image.mock();
+
+      const loader = new Loader();
+      sinon.stub(loader.resourceLoader, 'loadImage', () => {
+        return Promise.resolve(new mocks.Canvas())
+      });
+
+      const parser = new ObjectParser(loader, node);
+      return parser.getObjects().then(_o => {objects = _o});
+    });
+
+    afterEach(() => {
+      mocks.Image.restore();
+    });
+
+    it('returns an object indexed by object names', () => {
       expect(objects).to.be.an(Object);
       expect(objects).to.have.property('Megaman');
     });
 
-    it('should provide a constructor for object', function() {
-      character = new objects['Megaman'];
-      expect(character).to.be.a(Engine.objects.Character);
-    });
+    describe('parsed candidate', () => {
+      let candidate;
 
-    context('Animations', function() {
-      it('should have correct UV maps', function() {
-        expect(character.animations['idle']).to.be.an(Engine.Animator.Animation);
-        const uvs = character.animations['idle'].getValue(0);
-        expect(uvs).to.be.an(Engine.UVCoords);
-        expect(uvs[0][0].x).to.equal(0);
-        expect(uvs[0][0].y).to.equal(1);
-        expect(uvs[0][1].x).to.equal(0);
-        expect(uvs[0][1].y).to.equal(0.8125);
-        expect(uvs[0][2].x).to.equal(0.1875);
-        expect(uvs[0][2].y).to.equal(1);
-
-        expect(uvs[1][0].x).to.equal(0);
-        expect(uvs[1][0].y).to.equal(0.8125);
-        expect(uvs[1][1].x).to.equal(0.1875);
-        expect(uvs[1][1].y).to.equal(0.8125);
-        expect(uvs[1][2].x).to.equal(0.1875);
-        expect(uvs[1][2].y).to.equal(1);
+      beforeEach(() => {
+        candidate = objects['Megaman'];
       });
 
-      it('should have group set to undefined if not specified', function() {
-        expect(character.animations['idle'].group).to.be(undefined);
+      it('contains reference to parsed node', () => {
+        expect(candidate.node).to.be(node.querySelector('object[id=Megaman]'));
       });
 
-      it('should have group set to string if specified', function() {
-        expect(character.animations['run'].group).to.be('run');
-        expect(character.animations['run-fire'].group).to.be('run');
+      it('containes a constructor for object', () => {
+        expect(candidate.constructor).to.be.a(Function);
       });
-    });
 
-    it('should have default animation on construction', function() {
-      const uvs = character.animations['__default'].getValue(0);
-      expect(character.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);
-      expect(character.model.geometry.faceVertexUvs[0][1]).to.eql(uvs[1]);
-    });
+      describe('constructed instance', () => {
+        let instance;
 
-    it('should parse animation router', function() {
-      expect(character.routeAnimation()).to.be('test-value-is-fubar');
+        beforeEach(() => {
+          instance = new candidate.constructor();
+        });
+
+        it('is an Entity', () => {
+          expect(instance).to.be.an(Entity);
+        });
+
+        it('contains animation router', () => {
+          expect(instance.routeAnimation).to.be.a(Function);
+          expect(instance.routeAnimation()).to.be('test-value-is-fubar');
+        });
+
+        ['idle', 'run', 'run-fire'].forEach(name => {
+          it(`contains "${name}" animation`, () => {
+            expect(instance.animations[name]).to.be.an(Animation);
+          });
+        });
+
+        it('has default animation', () => {
+            expect(instance.animations['__default'])
+              .to.be(instance.animations['idle']);
+        });
+
+        it.skip('has default animation applied', () => {
+          const uvs = instance.animations['__default'].getValue(0);
+          expect(instance.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);
+          expect(instance.model.geometry.faceVertexUvs[0][1]).to.eql(uvs[1]);
+        });
+
+        it.skip('should take out face indices properly', function() {
+          const object = scene.world.getObject('json-index-only');
+          expect(object.animators[0].indices).to.eql([0, 1, 2, 3, 4, 100, 112]);
+          object = scene.world.getObject('range-index-star');
+          expect(object.animators[0].indices).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
+        });
+
+        describe('Animations', () => {
+          it.skip('have correct UV maps', () => {
+            const uvs = instance.animations['idle'].getValue(0);
+            expect(uvs).to.be.an(UVCoords);
+            expect(uvs[0][0].x).to.equal(0);
+            expect(uvs[0][0].y).to.equal(1);
+            expect(uvs[0][1].x).to.equal(0);
+            expect(uvs[0][1].y).to.equal(0.8125);
+            expect(uvs[0][2].x).to.equal(0.1875);
+            expect(uvs[0][2].y).to.equal(1);
+
+            expect(uvs[1][0].x).to.equal(0);
+            expect(uvs[1][0].y).to.equal(0.8125);
+            expect(uvs[1][1].x).to.equal(0.1875);
+            expect(uvs[1][1].y).to.equal(0.8125);
+            expect(uvs[1][2].x).to.equal(0.1875);
+            expect(uvs[1][2].y).to.equal(1);
+          });
+
+          it('have group set to null if not specified', () => {
+            expect(instance.animations['idle'].group).to.be(null);
+          });
+
+          it('have group set to string if specified', () => {
+            expect(instance.animations['run'].group).to.be('run');
+            expect(instance.animations['run-fire'].group).to.be('run');
+          });
+        });
+      });
     });
   });
-  describe('#parseAnimations', function() {
-    const textureMock = {size: {x: 128, y: 128}};
 
-    context('when animation group node has size specified', function() {
-      it('should use size from animation group node', function() {
-        const node = createNode('<animations w="48" h="44">' +
-          '<animation id="moot">' +
-            '<frame x="32" y="16"/>' +
-          '</animation>' +
-        '</animations>');
-        const parser = new ObjectParser();
-        const frameNode = node.childNodes[0];
-        const animation = parser.parseAnimation(frameNode, textureMock);
-        expect(animation.getValue()).to.eql(new Engine.UVCoords(
-          {x: 32, y: 16},
-          {x: 48, y: 44},
-          {x: 128, y: 128}));
-      });
-    });
-
-    context('when animation node has size specified', function() {
-      it('should use size from animation node', function() {
-        const node = createNode('<animations w="48" h="48">' +
-          '<animation id="moot" w="24" h="22">' +
-            '<frame x="32" y="16"/>' +
-          '</animation>' +
-        '</animations>');
-        const parser = new ObjectParser();
-        const frameNode = node.childNodes[0];
-        const animation = parser.parseAnimation(frameNode, textureMock);
-        expect(animation.getValue()).to.eql(new Engine.UVCoords(
-          {x: 32, y: 16},
-          {x: 24, y: 22},
-          {x: 128, y: 128}));
-      });
-    });
-
-    context('when frame has size specified', function() {
-      it('should use size from frame', function() {
-        const node = createNode('<animations w="48" h="48">' +
-          '<animation id="moot" w="24" h="22">' +
-            '<frame x="32" y="16" w="12" h="11"/>' +
-          '</animation>' +
-        '</animations>');
-        const parser = new ObjectParser();
-        const frameNode = node.childNodes[0];
-        const animation = parser.parseAnimation(frameNode, textureMock);
-        expect(animation.getValue()).to.eql(new Engine.UVCoords(
-          {x: 32, y: 16},
-          {x: 12, y: 11},
-          {x: 128, y: 128}));
-      });
-    });
-
-    context('when wrapped in <loop>', function() {
-      it('should duplicate a single frame', function() {
-        const node = createNode('<animations w="48" h="48">' +
-          '<animation id="moot" w="24" h="22">' +
-            '<loop count="13">' +
-              '<frame x="32" y="16" duration="1"/>' +
-            '</loop>' +
-          '</animation>' +
-        '</animations>');
-        const parser = new ObjectParser();
-        const animation = parser.parseAnimation(node.childNodes[0], textureMock);
-        expect(animation.length).to.be(13);
-      });
-
-      it('should duplicate mixed frames', function() {
-        const node = createNode('<animations w="48" h="48">' +
-          '<animation id="moot" w="20" h="10">' +
-            '<frame x="1" y="1" duration="13"/>' +
-            '<frame x="1" y="1" duration="19"/>' +
-            '<loop count="2">' +
-              '<frame x="1" y="1" duration="1"/>' +
-              '<frame x="2" y="2" duration="2"/>' +
-            '</loop>' +
-            '<frame x="3" y="3" duration="16"/>' +
-            '<frame x="4" y="4" duration="8"/>' +
-            '<loop count="3">' +
-              '<frame x="5" y="5" duration="4"/>' +
-            '</loop>' +
-            '<frame x="6" y="6" duration="8"/>' +
-          '</animation>' +
-        '</animations>');
-        const parser = new ObjectParser();
-        const animation = parser.parseAnimation(node.childNodes[0], textureMock);
-        const frames = animation.timeline.frames;
-        expect(animation.length).to.be(12);
-        let f = 0;
-        expect(frames[f++].duration).to.be(13);
-        expect(frames[f++].duration).to.be(19);
-        expect(frames[f++].duration).to.be(1);
-        expect(frames[f++].duration).to.be(2);
-        expect(frames[f++].duration).to.be(1);
-        expect(frames[f++].duration).to.be(2);
-        expect(frames[f++].duration).to.be(16);
-        expect(frames[f++].duration).to.be(8);
-        expect(frames[f++].duration).to.be(4);
-        expect(frames[f++].duration).to.be(4);
-        expect(frames[f++].duration).to.be(4);
-        expect(frames[f++].duration).to.be(8);
-      });
-    });
-
-    it('should parse an animation node', function() {
-      const node = getNode('animations');
-      const parser = new ObjectParser();
-      const animations = parser.parseAnimations(node,
-                                              {foo: {size: {x: 256, y: 256}}});
-      const animation = animations['__default'];
-      expect(animation).to.be.a(Engine.Animator.Animation);
-      expect(animation.id).to.equal('idle');
-      expect(animation.length).to.equal(2);
-      const uvs = animation.getValue(0);
-      expect(uvs).to.be.an(Engine.UVCoords);
-      expect(uvs[0][0].x).to.equal(0);
-      expect(uvs[0][0].y).to.equal(1);
-      expect(uvs[0][1].x).to.equal(0);
-      expect(uvs[0][1].y).to.equal(0.8125);
-      expect(uvs[0][2].x).to.equal(0.1875);
-      expect(uvs[0][2].y).to.equal(1);
-
-      expect(uvs[1][0].x).to.equal(0);
-      expect(uvs[1][0].y).to.equal(0.8125);
-      expect(uvs[1][1].x).to.equal(0.1875);
-      expect(uvs[1][1].y).to.equal(0.8125);
-      expect(uvs[1][2].x).to.equal(0.1875);
-      expect(uvs[1][2].y).to.equal(1);
-    });
-  });
-  describe('#parseTextures', function() {
+  describe.skip('#parseTextures', () => {
     let textures, character;
 
-    it('should return an object indexed by texture names', function() {
+    it('should return an object indexed by texture names', () => {
       const texturesNode = getNode('textures');
       const parser = new ObjectParser(loaderMock);
       textures = parser.parseTextures(texturesNode);
@@ -266,23 +188,23 @@ describe.skip('ObjectParser', function() {
       expect(textures).to.have.property('bar');
     });
 
-    it('should provide texture size', function() {
+    it('should provide texture size', () => {
       expect(textures['moot'].size).to.eql({x: 256, y: 128});
       expect(textures['foo'].size).to.eql({x: 129, y: 256});
       expect(textures['bar'].size).to.eql({x: 64, y: 96});
     });
 
-    it('should provide texture instances', function() {
+    it('should provide texture instances', () => {
       expect(textures['moot'].texture).to.be.a(THREE.Texture);
       expect(textures['foo'].texture).to.be.a(THREE.Texture);
       expect(textures['bar'].texture).to.be.a(THREE.Texture);
     });
 
-    it('should have the first found texture as default', function() {
+    it('should have the first found texture as default', () => {
       expect(textures['__default']).to.be(textures['moot']);
     });
 
-    it.skip('should load images', function() {
+    it.skip('should load images', () => {
       expect(textures['moot'].texture.image.src).to.equal('moot.png');
     });
   });

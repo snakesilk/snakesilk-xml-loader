@@ -208,4 +208,24 @@ describe('ObjectParser', () => {
       expect(textures['moot'].texture.image.src).to.equal('moot.png');
     });
   });
+
+  describe('Regression Tests', () => {
+    it('only finds first hand object nodes', (done) => {
+      const node = createNode(`<objects>
+        <object id="CollidableName"/>
+
+        <object id="UniqueName">
+          <node1>
+            <object id="CollidableName"/>
+            <node2>
+              <object id="CollidableName"/>
+            </node2>
+          </node1>
+        </object>
+      </objects>`);
+
+      const parser = new ObjectParser(new Loader(), node);
+      parser.getObjects().then(() => done()).catch(done);
+    });
+  });
 });

@@ -1,3 +1,4 @@
+const {children} = require('./util/traverse');
 const Parser = require('./Parser');
 const ActionParser = require('./ActionParser');
 
@@ -6,7 +7,7 @@ class SequenceParser extends Parser
     getSequences(sequencesNode)
     {
         const sequences = [];
-        const nodes = sequencesNode.querySelectorAll(':scope > sequence');
+        const nodes = children(sequencesNode, 'sequence');
         for (let node, i = 0; node = nodes[i]; ++i) {
             const id = this.getAttr(node, 'id');
             const sequence = this.getSequence(node);

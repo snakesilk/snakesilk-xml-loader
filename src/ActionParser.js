@@ -1,4 +1,6 @@
 const {Easing, SyncPromise, Tween} = require('@snakesilk/engine');
+
+const {children} = require('./util/traverse');
 const Parser = require('./Parser');
 
 class ActionParser extends Parser
@@ -11,7 +13,7 @@ class ActionParser extends Parser
     }
     getAction(node)
     {
-        const conditionNodes = node.querySelectorAll(':scope > condition');
+        const conditionNodes = children(node, 'condition');
         const conditions = [];
         for (let conditionNode, j = 0; conditionNode = conditionNodes[j++];) {
             const values = this.getAttr(conditionNode, 'value')
@@ -80,7 +82,7 @@ class ActionParser extends Parser
         const ids = [];
         const objectNodes = node.querySelectorAll('object');
         for (let node, i = 0; node = objectNodes[i]; ++i) {
-            const id = this.getAttr(node, 'instance');
+            const id = this.getAttr(node, 'instance-id');
             ids.push(id);
         }
 

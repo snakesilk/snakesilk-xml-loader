@@ -1,6 +1,7 @@
 const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
 const {Animation, UVAnimator, Entity, Objects, UVCoords} = require('@snakesilk/engine');
 
+const {children, find} = require('./util/traverse');
 const Parser = require('./Parser');
 const AnimationParser = require('./AnimationParser');
 const EventParser = require('./EventParser');
@@ -121,7 +122,7 @@ class ObjectParser extends Parser
             if (this._textures[id]) {
                 return this._textures[id];
             } else {
-                console.log(this._textures);
+                console.error(this._textures);
                 throw new Error('Texture "' + id + '" not defined');
             }
         } else if (this._textures['__default']) {
@@ -142,7 +143,7 @@ class ObjectParser extends Parser
     }
     _parseAnimations()
     {
-        const nodes = this._node.querySelectorAll('animations > animation');
+        const nodes = find(this._node, 'animations > animation');
         const animationParser = new AnimationParser();
 
         const animations = {
@@ -187,7 +188,7 @@ class ObjectParser extends Parser
     }
     _parseObjects()
     {
-        const objectNodes = this._node.querySelectorAll('object');
+        const objectNodes = children(this._node, 'object');
 
         const tasks = [];
         const objects = {};

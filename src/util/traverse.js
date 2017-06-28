@@ -18,6 +18,12 @@ function children(parent, selector) {
     return next;
 }
 
+function find(parent, selector) {
+    return children(parent, '*').reduce((all, child) => {
+        return all.concat(Array.from(child.querySelectorAll(selector)));
+    }, []);
+}
+
 function closest(node, selector) {
     for (; node && node !== node.ownerDocument; node = node.parentNode) {
         if (node.matches(selector)) {
@@ -28,6 +34,7 @@ function closest(node, selector) {
 
 module.exports = {
     ensure,
+    find,
     children,
     closest,
 };

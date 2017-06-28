@@ -194,17 +194,21 @@ class ObjectParser extends Parser
         for (let i = 0, node; node = objectNodes[i++];) {
             const id = node.getAttribute('id');
             if (objects[id]) {
-                console.error(node);
-                throw new Error('Object id ' + id + ' already defined');
+                console.error(node.outerHTML);
+                throw new Error(`Object id "${id}" already defined`);
             }
+
+            objects[id] = {
+                node,
+                constructor: null,
+            };
+
             const task = this._parseObject(node).then(blueprint => {
                 return this._createConstructor(blueprint);
             }).then(constructor => {
-                objects[id] = {
-                    node: node,
-                    constructor: constructor,
-                };
+                objects[id].constructor = constructor;
             });
+
             tasks.push(task);
         }
         return Promise.all(tasks).then(() => {

@@ -34,6 +34,8 @@ function createSolid() {
     return object;
 }
 
+const DEFAULT_POS = new Vector3(0, 0, 0);
+
 const BEHAVIOR_MAP = {
     'climbables': createClimbable,
     'deathzones': createDeathZone,
@@ -47,8 +49,6 @@ class SceneParser extends Parser
         ensure(node, 'scene');
 
         super(loader);
-
-        this.DEFAULT_POS = new Vector3(0, 0, 0);
 
         this._node = node;
         this._scene = null;
@@ -235,7 +235,7 @@ class SceneParser extends Parser
         instance.id = instanceId;
 
         const direction = this.getInt(node, 'dir') || 1;
-        const position = this.getPosition(node) || this.DEFAULT_POS;
+        const position = this.getPosition(node) || DEFAULT_POS;
 
         instance.direction.set(direction, 0);
         instance.position.copy(position);

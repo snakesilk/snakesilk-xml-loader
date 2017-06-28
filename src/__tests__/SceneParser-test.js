@@ -65,6 +65,7 @@ describe('SceneParser', () => {
               <${tag}>
                 <rect x="136" y="-184" w="240" h="16"/>
                 <rect x="1976.23" y="-408.2112" w="16.5" h="32.23"/>
+                <rect w="125.24" h="45.24"/>
               </${tag}>
             </behaviors>
           </layout>
@@ -75,7 +76,11 @@ describe('SceneParser', () => {
 
       it(`has only ${tag} in world`, () => {
         const objects = scene.world.objects.filter(o => o[trait]);
-        expect(objects).to.have.length(2);
+        expect(objects).to.have.length(3);
+      });
+
+      it('provides default position', () => {
+        expect(scene.world.objects[2].position).to.eql({ x: 0, y: 0, z: 0 });
       });
 
       it('honors positions and sizes', () => {

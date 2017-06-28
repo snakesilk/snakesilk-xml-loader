@@ -52,7 +52,7 @@ class ObjectParser extends Parser
             this.name = blueprint.id;
 
             blueprint.traits.forEach(Trait => {
-                this.applyTrait(new Trait);
+                this.applyTrait(new Trait());
             });
 
             /* Run initial update of all UV maps. */

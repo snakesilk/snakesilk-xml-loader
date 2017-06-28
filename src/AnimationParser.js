@@ -1,43 +1,86 @@
 const {Vector2} = require('three');
 const {Animation, UVCoords} = require('@snakesilk/engine');
 
+const {closest} = require('./traverse')
 const Parser = require('./Parser');
+
+class LoopTree
+{
+    constructor(frames = [], loops = 1)
+    {
+        this.frames = frames;
+        this.loops = loops;
+    }
+
+    squash() {
+        return flatten(this);
+    }
+}
+
+function flatten(loopTree) {
+  const flat = loopTree.frames.reduce((flat, frame) => {
+    if (frame instanceof LoopTree) {
+      return flat.concat(flatten(frame));
+    }
+    return flat.concat([frame]);
+  }, []);
+
+  const all = [];
+  for (let i = 0; i < loopTree.loops; ++i) {
+    all.push(...flat);
+  }
+
+  return all;
+}
 
 class AnimationParser extends Parser
 {
+    getUVMap(frameNode, textureSize) {
+        const offset = this.getVector2(frameNode, 'x', 'y');
+
+        const size = this.getVector2(frameNode, 'w', 'h') ||
+                     this.getVector2(closest(frameNode, 'animation'), 'w', 'h') ||
+                     this.getVector2(closest(frameNode, 'animations'), 'w', 'h');
+
+        return new UVCoords(offset, size, textureSize);
+    }
+
     parseAnimation(animationNode, textureSize)
     {
         const id = animationNode.getAttribute('id');
         const group = animationNode.getAttribute('group') || undefined;
         const animation = new Animation(id, group);
-        const frameNodes = animationNode.getElementsByTagName('frame');
-        let loop = [];
-        for (let i = 0, frameNode; frameNode = frameNodes[i++];) {
-            const offset = this.getVector2(frameNode, 'x', 'y');
-            const size = this.getVector2(frameNode, 'w', 'h') ||
-                         this.getVector2(frameNode.parentNode, 'w', 'h') ||
-                         this.getVector2(frameNode.parentNode.parentNode, 'w', 'h');
-            const uvMap = new UVCoords(offset, size, textureSize);
-            const duration = this.getFloat(frameNode, 'duration') || undefined;
-            animation.addFrame(uvMap, duration);
 
-            const parent = frameNode.parentNode;
-            if (parent.tagName === 'loop') {
-                loop.push([uvMap, duration]);
-                const next = frameNodes[i+1] && frameNodes[i+1].parentNode;
-                if (parent !== next) {
-                    let loopCount = parseInt(parent.getAttribute('count'), 10) || 1;
-                    while (--loopCount) {
-                        for (let j = 0; j < loop.length; ++j) {
-                            animation.addFrame(loop[j][0], loop[j][1]);
-                        }
-                    }
-                    loop = [];
-                }
-            }
-        }
+        const loopTree = new LoopTree();
+        this.parseAnimationChildren(loopTree, animationNode.children, textureSize);
+        loopTree.squash().forEach(([uvMap, duration]) => {
+            animation.addFrame(uvMap, duration);
+        });
 
         return animation;
+    }
+
+    parseAnimationChildren(loopTree, nodes, textureSize) {
+        Array.from(nodes).forEach(node => {
+            loopTree.frames.push(this.parseAnimationChild(node, textureSize));
+        });
+    }
+
+    parseAnimationChild(node, textureSize) {
+         if (node.tagName === 'loop') {
+            const loopTree = new LoopTree();
+            loopTree.loops = parseInt(node.getAttribute('count'), 10);
+            this.parseAnimationChildren(loopTree, node.children, textureSize);
+            return loopTree;
+        } else {
+            return this.parseFrame(node, textureSize);
+        }
+    }
+
+    parseFrame(frameNode, textureSize) {
+        const uvMap = this.getUVMap(frameNode, textureSize);
+        const duration = this.getFloat(frameNode, 'duration') || undefined;
+        return [uvMap, duration];
     }
 }
 

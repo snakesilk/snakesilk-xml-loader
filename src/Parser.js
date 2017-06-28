@@ -1,6 +1,5 @@
 const THREE = require('three');
 
-const {Camera} = require('@snakesilk/engine');
 const CanvasUtil = require('@snakesilk/engine/dist/CanvasUtil');
 const Util = require('@snakesilk/engine/dist/Util');
 
@@ -61,24 +60,6 @@ class Parser
     getBool(node, attr)
     {
         return node.getAttribute(attr) === 'true';
-    }
-    getCameraPath(pathNode)
-    {
-        const z = 150;
-        const path = new Camera.Path();
-        /* y1 and y2 is swapped because they are converted to negative values and
-           y2 should always be bigger than y1. */
-        const windowNode = pathNode.getElementsByTagName('window')[0];
-        path.window[0] = this.getPosition(windowNode, 'x1', 'y1');
-        path.window[1] = this.getPosition(windowNode, 'x2', 'y2');
-
-        const constraintNode = pathNode.getElementsByTagName('constraint')[0];
-        path.constraint[0] = this.getPosition(constraintNode, 'x1', 'y1', 'z');
-        path.constraint[1] = this.getPosition(constraintNode, 'x2', 'y2', 'z');
-        path.constraint[0].z = z;
-        path.constraint[1].z = z;
-
-        return path;
     }
     getColor(node, attr = 'color')
     {

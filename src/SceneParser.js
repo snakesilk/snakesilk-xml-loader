@@ -3,6 +3,7 @@ const {Vector3} = require('three');
 const {Entity, Scene, Traits} = require('@snakesilk/engine');
 
 const Parser = require('./Parser');
+const CameraParser = require('./CameraParser');
 const EventParser = require('./EventParser');
 const ObjectParser = require('./ObjectParser');
 const SequenceParser = require('./SequenceParser');
@@ -149,28 +150,16 @@ class SceneParser extends Parser
     }
     _parseCamera()
     {
-        const cameraNode = this._node.querySelector(':scope > camera');
-        if (cameraNode) {
-            const camera = this._scene.camera;
-            const smoothing = this.getFloat(cameraNode, 'smoothing');
-            if (smoothing) {
-                camera.smoothing = smoothing;
-            }
-
-            const posNode = cameraNode.querySelector(':scope > position');
-            if (posNode) {
-                const position = this.getPosition(posNode);
-                camera.position.copy(position);
-            }
-
-            const pathNodes = cameraNode.querySelectorAll(':scope > path');
-            for (let pathNode, i = 0; pathNode = pathNodes[i]; ++i) {
-                const path = this.getCameraPath(pathNode);
-                camera.addPath(path);
-            }
+        const cameraNode = children(this._node, 'camera')[0];
+        if (!cameraNode) {
+            return;
         }
 
-        return Promise.resolve();
+        const cameraParser = new CameraParser();
+        return cameraParser.getCamera(cameraNode)
+        .then(camera => {
+            this._scene.camera = camera;
+        });
     }
     _parseEvents()
     {

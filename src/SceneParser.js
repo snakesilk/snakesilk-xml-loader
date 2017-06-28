@@ -10,6 +10,36 @@ const ObjectParser = require('./ObjectParser');
 const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
 
+
+function createClimbable()
+{
+    const object = new Entity();
+    object.applyTrait(new Traits.Climbable());
+    return object;
+}
+
+function createDeathZone()
+{
+    const object = new Entity();
+    object.applyTrait(new Traits.DeathZone());
+    return object;
+}
+
+function createSolid() {
+    const object = new Entity();
+    const solid = new Traits.Solid();
+    solid.fixed = true;
+    solid.obstructs = true;
+    object.applyTrait(solid);
+    return object;
+}
+
+const BEHAVIOR_MAP = {
+    'climbables': createClimbable,
+    'deathzones': createDeathZone,
+    'solids': createSolid,
+};
+
 class SceneParser extends Parser
 {
     constructor(loader, node)
@@ -19,11 +49,6 @@ class SceneParser extends Parser
         super(loader);
 
         this.DEFAULT_POS = new Vector3(0, 0, 0);
-        this.BEHAVIOR_MAP = {
-            'climbables': this._createClimbable,
-            'deathzones': this._createDeathZone,
-            'solids': this._createSolid,
-        };
 
         this._node = node;
         this._scene = null;
@@ -31,33 +56,13 @@ class SceneParser extends Parser
         this._bevahiorObjects = [];
         this._layoutObjects = [];
     }
-    _createClimbable()
-    {
-        const object = new Entity();
-        object.applyTrait(new Traits.Climbable());
-        return object;
-    }
-    _createDeathZone()
-    {
-        const object = new Entity();
-        object.applyTrait(new Traits.DeathZone());
-        return object;
-    }
-    _createSolid() {
-        const object = new Entity();
-        const solid = new Traits.Solid();
-        solid.fixed = true;
-        solid.obstructs = true;
-        object.applyTrait(solid);
-        return object;
-    }
     getBehavior(node)
     {
         const type = node.parentNode.tagName.toLowerCase();
-        if (!this.BEHAVIOR_MAP[type]) {
+        if (!BEHAVIOR_MAP[type]) {
             throw new Error('Behavior ' + type + ' not in behavior map');
         }
-        const factory = this.BEHAVIOR_MAP[type];
+        const factory = BEHAVIOR_MAP[type];
         const rect = this.getRect(node);
         const instance = factory();
         instance.addCollisionRect(rect.w, rect.h);

@@ -70,17 +70,20 @@ class SceneParser extends Parser
     getScene()
     {
         if (!this._promise) {
-            this._promise = this._parse();
-        }
-        return this._promise.then(scene => {
-            scene.name = this._node.getAttribute('name');
+            this._promise = this._parse()
+            .then(scene => {
+                scene.name = this._node.getAttribute('name');
+                /*
+                Perform update to "settle" world.
+                This is done to prevent audio and other side effects from leaking out on scene start.
 
-            /* Perform update to "settle" world.
-               This is done to prevent audio and other side effects
-               from leaking out on scene start. */
-            scene.world.simulateTime(0);
-            return scene;
-        });
+                For example, if an entity emits audio when landing after a jump, and placed on the ground in the world from start, the jump land event would be fired on the first frame.
+                */
+                scene.world.simulateTime(0);
+                return scene;
+            });
+        }
+        return this._promise;
     }
     _createObject(id)
     {

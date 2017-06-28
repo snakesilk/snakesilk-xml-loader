@@ -1,3 +1,13 @@
+function ensure(node, selector) {
+    if (!node.tagName) {
+        throw new TypeError(`${node} is not an XML node`);
+    }
+
+    if (!node.matches(selector)) {
+        throw new TypeError(`${node.outerHTML} must match selector "${selector}"`);
+    }
+}
+
 function children(parent, selector) {
     const next = [];
     for (let i = 0; node = parent.children[i]; ++i) {
@@ -17,6 +27,7 @@ function closest(node, selector) {
 }
 
 module.exports = {
+    ensure,
     children,
     closest,
 };

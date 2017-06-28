@@ -23,6 +23,7 @@
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
   "devDependencies": {
     "@snakesilk/engine": "^0.2.2",
+    "@snakesilk/testing": "^0.1.1",
     "babel-cli": "6",
     "babel-preset-es2015": "6",
     "codecov": "^1.0.1",

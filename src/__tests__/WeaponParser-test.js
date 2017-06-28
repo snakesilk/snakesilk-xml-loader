@@ -1,6 +1,6 @@
 const expect = require('expect.js');
 const sinon = require('sinon');
-const {createNode} = require('./helpers/xmlreader');
+const {createNode} = require('@snakesilk/testing/xml');
 
 const {Entity, Loader, Objects} = require('@snakesilk/engine');
 const WeaponParser = require('../WeaponParser');

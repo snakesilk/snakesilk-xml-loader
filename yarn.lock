@@ -8,10 +8,11 @@
   dependencies:
     three "0.70"
 
-"@snakesilk/testing@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@snakesilk/testing/-/testing-0.1.1.tgz#bff433c4c98d29ebf9d9bde7838f3086553731cb"
+"@snakesilk/testing@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/testing/-/testing-0.2.0.tgz#c88307f7bb607d93901f07abbd8dc8bd76966230"
   dependencies:
+    node-jsdom "^3.1.5"
     sinon "^1.17.3"
     three "0.70"
 

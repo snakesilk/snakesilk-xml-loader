@@ -1,10 +1,9 @@
 const expect = require('expect.js');
 const sinon = require('sinon');
 const fs = require('fs');
+const {createNode} = require('@snakesilk/testing/xml');
 
 const THREE = require('three');
-const {createNode} = require('./helpers/xmlreader');
-
 const {Entity, World} = require('@snakesilk/engine');
 
 const Parser = require('../Parser');

@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/snakesilk/snakesilk-xml-loader#readme",
   "dependencies": {
-    "@snakesilk/engine": "^0.3.0",
+    "@snakesilk/engine": "^0.3.1",
     "three": "0.70"
   },
   "devDependencies": {

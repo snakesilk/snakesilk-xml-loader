@@ -1,8 +1,8 @@
 const {Vector2} = require('three');
 const {Animation, UVCoords} = require('@snakesilk/engine');
 
-const {closest} = require('./util/traverse')
-const LoopTree = require('./util/LoopTree');
+const {closest} = require('../util/traverse')
+const LoopTree = require('../util/LoopTree');
 const Parser = require('./Parser');
 
 class AnimationParser extends Parser

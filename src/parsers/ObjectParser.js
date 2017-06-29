@@ -33,8 +33,7 @@ class ObjectParser extends Parser
     _createConstructor(blueprint)
     {
         if (!blueprint.textures['__default']) {
-            console.warn('No default texture on blueprint', blueprint);
-            //throw new Error('No default texture on blueprint');
+            console.warn('No default texture on blueprint', blueprint.id);
         }
 
         const constructor = this.createObject(blueprint.id, blueprint.constructor, function objectConstructor() {

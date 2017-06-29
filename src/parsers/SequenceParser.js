@@ -1,4 +1,4 @@
-const {children} = require('./util/traverse');
+const {children} = require('../util/traverse');
 const Parser = require('./Parser');
 const ActionParser = require('./ActionParser');
 

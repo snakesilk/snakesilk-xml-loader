@@ -1,6 +1,6 @@
 const {Easing, SyncPromise, Tween} = require('@snakesilk/engine');
 
-const {children} = require('./util/traverse');
+const {children} = require('../util/traverse');
 const Parser = require('./Parser');
 
 class ActionParser extends Parser

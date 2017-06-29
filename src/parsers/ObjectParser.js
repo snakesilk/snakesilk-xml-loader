@@ -1,7 +1,7 @@
 const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
 const {Animation, UVAnimator, Entity, Objects, UVCoords} = require('@snakesilk/engine');
 
-const {children, find} = require('./util/traverse');
+const {children, find} = require('../util/traverse');
 const Parser = require('./Parser');
 const AnimationParser = require('./AnimationParser');
 const EventParser = require('./EventParser');

@@ -1,5 +1,5 @@
 const {Camera} = require('@snakesilk/engine');
-const {ensure, children} = require('./util/traverse');
+const {ensure, children} = require('../util/traverse');
 const Parser = require('./Parser');
 
 class CameraParser extends Parser

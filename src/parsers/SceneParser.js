@@ -2,7 +2,7 @@ const {Vector3} = require('three');
 
 const {Entity, Scene, Traits} = require('@snakesilk/engine');
 
-const {children, find, ensure} = require('./util/traverse');
+const {children, find, ensure} = require('../util/traverse');
 const Parser = require('./Parser');
 const CameraParser = require('./CameraParser');
 const EventParser = require('./EventParser');

@@ -114,7 +114,7 @@ class GameParser extends Parser
                 .then(objects => {
                     Object.keys(objects).forEach(id => {
                         const object = objects[id];
-                        resource.addAuto(id, object.constructor);
+                        resource.addObject(id, object.constructor);
                     });
                 });
             tasks.push(task);
@@ -162,7 +162,6 @@ class GameParser extends Parser
             const weapons = weaponParser.parse(weaponsNode);
             const player = this.loader.game.player;
             Object.keys(weapons).forEach((key) => {
-                resource.addAuto(key, weapons[key]);
                 const weaponInstance = new weapons[key];
                 player.weapons[weaponInstance.code] = weaponInstance;
             });

@@ -110,7 +110,7 @@ class ObjectParser extends Parser
     _getConstructor(type, source)
     {
         if (type === 'character') {
-            const Character = Objects[source];
+            const Character = this.loader.entities.resolve(source);
             return Character;
         }
         return Entity;

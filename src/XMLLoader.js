@@ -1,18 +1,8 @@
 const {Loader} = require('@snakesilk/engine');
-
-const GameParser = require('./parsers/GameParser');
 const SceneParser = require('./parsers/SceneParser');
-const LevelParser = require('./parsers/LevelParser');
-const StageSelectParser = require('./parsers/StageSelectParser');
 
 class XMLLoader extends Loader
 {
-    constructor(game)
-    {
-        super(game);
-        this.entryPoint = null;
-        this.sceneIndex = {};
-    }
     asyncLoadXML(url)
     {
         return this.resourceLoader.loadXML(url);
@@ -27,14 +17,6 @@ class XMLLoader extends Loader
             return doc.children[0];
         });
     }
-    loadGame(url)
-    {
-        return this.asyncLoadXML(url).then(doc => {
-            const node = doc.querySelector('game');
-            const parser = new GameParser(this, node);
-            return parser.parse();
-        });
-    }
     loadScene(url)
     {
         return this.asyncLoadXML(url).then(doc => {
@@ -42,35 +24,10 @@ class XMLLoader extends Loader
             return this.parseScene(sceneNode);
         });
     }
-    loadSceneByName(name)
-    {
-        if (!this.sceneIndex[name]) {
-            throw new Error(`Scene "${name}" does not exist.`);
-        }
-
-        return this.loadScene(this.sceneIndex[name].url);
-    }
     parseScene(node)
     {
-        if (node.tagName !== 'scene') {
-            throw new TypeError('Node not <scene>');
-        }
-
-        const type = node.getAttribute('type');
-        if (type) {
-            if (type === 'level') {
-                const parser = new LevelParser(this, node);
-                return parser.getScene();
-            } else if (type === 'stage-select') {
-                const parser = new StageSelectParser(this, node);
-                return parser.getScene();
-            } else {
-                throw new Error(`Scene type "${type}" not recognized`);
-            }
-        } else {
-            const parser = new SceneParser(this, node);
-            return parser.getScene();
-        }
+        const parser = new SceneParser(this, node);
+        return parser.getScene();
     }
     resolveURL(node, attr)
     {

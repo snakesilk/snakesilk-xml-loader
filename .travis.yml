@@ -8,6 +8,6 @@ branches:
   only:
   - master
 script:
-- npm run test+coverage
+- npm run test+coverage && npm run build
 after_success:
 - npm run upload-coverage

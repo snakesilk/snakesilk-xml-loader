@@ -1,5 +1,5 @@
 <objects>
-    <object type="character" source="Megaman" id="Megaman">
+    <object type="character" source="MyGuy" id="GIJoe">
         <geometry type="plane" w="48" h="48" />
 
         <collision>

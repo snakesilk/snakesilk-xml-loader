@@ -7,57 +7,21 @@ const {Animation, Entity, Loader, Objects, UVCoords} = require('@snakesilk/engin
 const ObjectParser = require('../ObjectParser');
 
 describe('ObjectParser', () => {
-    let parser;
+  let loader;
 
-    [
-        'Airman',
-        'Crashman',
-        'Flashman',
-        'Heatman',
-        'Megaman',
-        'Metalman',
+  /* Support transpiled code extending. */
+  function MyGuy() {
+    const entity = new Entity();
+    Object.assign(this, entity);
+  };
+  MyGuy.prototype = Object.create(Entity.prototype);
+  MyGuy.prototype.constructor = Entity;
 
-        'ChangkeyMaker',
-        'Shotman',
-        'SniperArmor',
-        'SniperJoe',
-        'Telly',
-    ].forEach(name => {
-        const id = name + '-id';
-        const xmlString = `<objects>
-             <object type="character" source="${name}" id="${id}">
-        </objects>`;
-
-        describe(`when parsing ${xmlString}`, () => {
-            let Entity;
-
-            beforeEach(() => {
-                const node = createNode(xmlString);
-                parser = new ObjectParser(new Loader(), node);
-                return parser.getObjects()
-                    .then(objects => {
-                        Entity = objects[id].constructor;
-                    });
-            });
-
-            it(`produces a ${name} entity`, () => {
-              expect(Entity).to.be.a(Function);
-            });
-
-            it.skip(`produces a ${name} entity`, () => {
-              expect(new Entity()).to.be.a(Objects[name]);
-            });
-        });
-    });
-});
-
-describe('ObjectParser', () => {
   beforeEach(() => {
-
-  });
-
-  afterEach(function() {
-
+    loader = new Loader();
+    loader.entities.add({
+      'MyGuy': MyGuy,
+    });
   });
 
   describe('#getObjects', () => {
@@ -70,7 +34,6 @@ describe('ObjectParser', () => {
     beforeEach(() => {
       mocks.Image.mock();
 
-      const loader = new Loader();
       sinon.stub(loader.resourceLoader, 'loadImage', () => {
         return Promise.resolve(new mocks.Canvas())
       });
@@ -85,18 +48,18 @@ describe('ObjectParser', () => {
 
     it('returns an object indexed by object names', () => {
       expect(objects).to.be.an(Object);
-      expect(objects).to.have.property('Megaman');
+      expect(objects).to.have.property('GIJoe');
     });
 
     describe('parsed candidate', () => {
       let candidate;
 
       beforeEach(() => {
-        candidate = objects['Megaman'];
+        candidate = objects['GIJoe'];
       });
 
       it('contains reference to parsed node', () => {
-        expect(candidate.node).to.be(node.querySelector('object[id=Megaman]'));
+        expect(candidate.node).to.be(node.querySelector('object[id=GIJoe]'));
       });
 
       it('containes a constructor for object', () => {

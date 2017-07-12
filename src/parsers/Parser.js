@@ -1,7 +1,22 @@
 const THREE = require('three');
 
 const CanvasUtil = require('@snakesilk/engine/dist/CanvasUtil');
-const Util = require('@snakesilk/engine/dist/Util');
+
+function renameFunction(name, fn) {
+    return (new Function("return function (call) { return function " + name +
+        " () { return call(this, arguments) }; };")())(Function.apply.bind(fn));
+}
+
+function extend(child, parent, props) {
+    child.prototype = Object.create(parent.prototype);
+    child.prototype.constructor = child;
+
+    if (props) {
+        Object.keys(props).forEach(function(key) {
+            child.prototype[key] = props[key];
+        });
+    }
+}
 
 class Parser
 {
@@ -17,8 +32,8 @@ class Parser
     createObject(name, ext, func)
     {
         const fnName = name.replace(/-/g, '');
-        const object = Util.renameFunction(fnName, func);
-        Util.extend(object, ext);
+        const object = renameFunction(fnName, func);
+        extend(object, ext);
         return object;
     }
     getArray(nodes, attr)

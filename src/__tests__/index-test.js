@@ -12,5 +12,21 @@ describe('Main Export', function() {
     it('exports XMLLoader', () => {
       expect(Main.XMLLoader).to.be(require('../XMLLoader'));
     });
+
+    it('exports Parser', () => {
+      expect(Main.Parser).to.be(require('../parsers/Parser'));
+    });
+
+    it('exports ObjectParser', () => {
+      expect(Main.Parser.ObjectParser).to.be(require('../parsers/ObjectParser'));
+    });
+
+    it('exports SceneParser', () => {
+      expect(Main.Parser.SceneParser).to.be(require('../parsers/SceneParser'));
+    });
+
+    it('exports TraitParser', () => {
+      expect(Main.Parser.TraitParser).to.be(require('../parsers/TraitParser'));
+    });
   });
 });

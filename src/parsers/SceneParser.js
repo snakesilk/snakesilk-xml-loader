@@ -1,6 +1,10 @@
 const {Vector3} = require('three');
 
-const {Entity, Scene, Traits} = require('@snakesilk/engine');
+/* This dependency is for legacy functionality with <behavior> node and
+will be handled by a behavior registry. */
+const Traits = require('@snakesilk/platform-traits');
+
+const {Entity, Scene} = require('@snakesilk/engine');
 
 const {children, find, ensure} = require('../util/traverse');
 const Parser = require('./Parser');
@@ -247,7 +251,7 @@ class SceneParser extends Parser
 
         const traitNodes = node.getElementsByTagName('trait');
         if (traitNodes) {
-            const traitParser = new TraitParser();
+            const traitParser = new TraitParser(this.loader);
             const traits = [];
             for (let traitNode, i = 0; traitNode = traitNodes[i++];) {
                 const Trait = traitParser.parseTrait(traitNode);

@@ -9,6 +9,8 @@ const THREE = require('three');
 const {Game, Loader, World} = require('@snakesilk/engine');
 const SceneParser = require('../SceneParser');
 
+const {createFakeTraitFactory} = require('./helpers');
+
 describe('SceneParser', () => {
   let scene;
 
@@ -111,6 +113,12 @@ describe('SceneParser', () => {
       mocks.THREE.WebGLRenderer.mock();
 
       const loader = new Loader(new Game());
+
+      loader.traits.add({
+        'solid': createFakeTraitFactory('solid'),
+        'disappearing': createFakeTraitFactory('disappearing'),
+      });
+
       sinon.stub(loader.resourceLoader, 'loadImage', () => {
         return Promise.resolve(new mocks.Canvas())
       });
@@ -156,7 +164,7 @@ describe('SceneParser', () => {
 
         it('creates Solids', () => {
           const solids = scene.world.objects.filter(object => object.solid);
-          expect(solids).to.have.length(5);
+          expect(solids).to.have.length(7);
         });
 
         it('should not put any objects in scene without texture ', () => {

@@ -5,6 +5,7 @@ const {children, find} = require('../util/traverse');
 const Parser = require('./Parser');
 const AnimationParser = require('./AnimationParser');
 const EventParser = require('./EventParser');
+const FaceParser = require('./FaceParser');
 const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
 
@@ -17,6 +18,8 @@ class ObjectParser extends Parser
         }
 
         super(loader);
+
+        this.faceParser = new FaceParser(this.loader);
 
         this._node = node;
 
@@ -90,23 +93,6 @@ class ObjectParser extends Parser
 
         return constructor;
     }
-    _faceCoordsToIndex(coords, segs)
-    {
-        let i, j, x, y, faceIndex, indices = [];
-        for (i in coords.x) {
-            x = coords.x[i] - 1;
-            for (j in coords.y) {
-                y = coords.y[j] - 1;
-                /* The face index is the first of the two triangles that make up a rectangular
-                   face. The Animator.UV will set the UV map to the faceIndex and faceIndex+1.
-                   Since we expect to paint two triangles at every index we need to 2x the index
-                   count so that we skip two faces for every index jump. */
-                faceIndex = (x + (y * segs.x)) * 2;
-                indices.push(faceIndex);
-            }
-        }
-        return indices;
-    }
     _getConstructor(type, source)
     {
         if (type === 'character') {
@@ -160,30 +146,6 @@ class ObjectParser extends Parser
         }
 
         return Promise.resolve(animations);
-    }
-    _parseFace(faceNode)
-    {
-        const indices = [];
-        const segs = this.getVector2(faceNode.parentNode, 'w-segments', 'h-segments')
-                   || new Vector2(1, 1);
-
-        const rangeNodes = faceNode.getElementsByTagName('range');
-        for (let rangeNode, i = 0; rangeNode = rangeNodes[i]; ++i) {
-            const coords = {
-                'x': this.getRange(rangeNode, 'x', segs.x),
-                'y': this.getRange(rangeNode, 'y', segs.y),
-            };
-            const rangeIndices = this._faceCoordsToIndex(coords, segs);
-            Array.prototype.push.apply(indices, rangeIndices);
-        }
-
-        const indexJSON = faceNode.getAttribute('index');
-        if (indexJSON) {
-            const jsonIndices = JSON.parse(indexJSON);
-            Array.prototype.push.apply(indices, jsonIndices);
-        }
-
-        return indices;
     }
     _parseObjects()
     {
@@ -247,36 +209,11 @@ class ObjectParser extends Parser
                 blueprint.geometries.push(geometry);
 
                 const faceNodes = geometryNode.getElementsByTagName('face');
-                for (let j = 0, faceNode; faceNode = faceNodes[j]; ++j) {
-                    const animator = new UVAnimator();
-                    animator.indices = [];
-                    animator.offset = this.getFloat(faceNode, 'offset') || 0;
+                const animators = this.faceParser.parseAnimators(faceNodes, animations);
 
-                    animator.name = faceNode.getAttribute('animation');
-                    if (!animator.name) {
-                        throw new Error("No default animation defined");
-                    }
-                    if (!animations[animator.name]) {
-                        throw new Error("Animation " + animator.name + " not defined");
-                    }
-                    const animation = animations[animator.name];
-
-                    animator.setAnimation(animation);
-
-                    animator.indices = this._parseFace(faceNode);
-
-                    if (animator.indices.length === 0) {
-                        animator.indices = [j * 2];
-                    }
-
-                    animator.indices.sort(function(a, b) {
-                        return a - b;
-                    });
-
-                    blueprint.animators.push(animator);
-                }
-
-                if (!blueprint.animators.length && animations['__default']) {
+                if (animators.length) {
+                    blueprint.animators.push(...animators);
+                } else if(animations['__default']) {
                     const animator = new UVAnimator();
                     animator.setAnimation(animations['__default']);
                     animator.update();

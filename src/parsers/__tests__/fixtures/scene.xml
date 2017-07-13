@@ -202,7 +202,6 @@
             </collision>
             <traits>
                 <trait name="solid"/>
-                <trait name="destructible"/>
             </traits>
         </object>
 
@@ -216,9 +215,7 @@
                 <rect x="0" y="0" w="32" h="64"/>
             </collision>
             <traits>
-                <trait name="door">
-                    <direction x="-1" y="0"/>
-                </trait>
+                <trait name="solid"/>
             </traits>
         </object>
 

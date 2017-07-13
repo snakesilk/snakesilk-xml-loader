@@ -3,8 +3,10 @@ const sinon = require('sinon');
 const mocks = require('@snakesilk/testing/mocks');
 const {createNode, readXMLFile} = require('@snakesilk/testing/xml');
 
-const {Animation, Entity, Loader, Objects, UVCoords} = require('@snakesilk/engine');
+const {Animation, Entity, Loader, Objects, Trait, UVCoords} = require('@snakesilk/engine');
 const ObjectParser = require('../ObjectParser');
+
+const {createFakeTraitFactory} = require('./helpers');
 
 describe('ObjectParser', () => {
   let loader;
@@ -21,6 +23,11 @@ describe('ObjectParser', () => {
     loader = new Loader();
     loader.entities.add({
       'MyGuy': MyGuy,
+    });
+
+    loader.traits.add({
+      'jump': createFakeTraitFactory('jump'),
+      'physics': createFakeTraitFactory('physics'),
     });
   });
 

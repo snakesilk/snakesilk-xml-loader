@@ -1,7 +1,7 @@
 const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
 const {Animation, UVAnimator, Entity, Objects, UVCoords} = require('@snakesilk/engine');
 
-const {children, find} = require('../util/traverse');
+const {children, ensure, find} = require('../util/traverse');
 const Parser = require('./Parser');
 const AnimationParser = require('./AnimationParser');
 const EventParser = require('./EventParser');
@@ -9,33 +9,51 @@ const FaceParser = require('./FaceParser');
 const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
 
+const DEFAULT = '__default';
+
+class Context {
+    constructor() {
+        this.animations = new Map();
+        this.textures = new Map();
+    }
+
+    getTexture(id) {
+        if (id) {
+            if (this.textures.has(id)) {
+                return this.textures.get(id);
+            } else {
+                console.error(this.textures);
+                throw new Error(`Texture "${id}" not defined.`);
+            }
+        } else if (this.textures.has(DEFAULT)) {
+            return this.textures.get(DEFAULT);
+        } else {
+            throw new Error('Default texture not defined');
+        }
+    }
+}
+
 class ObjectParser extends Parser
 {
-    constructor(loader, node)
-    {
-        if (!node || node.tagName !== 'objects') {
-            throw new TypeError('Node not <objects>');
-        }
-
+    constructor(loader) {
         super(loader);
 
-        this.faceParser = new FaceParser(this.loader);
-
-        this._node = node;
-
-        this._animations = null;
-        this._textures = null;
+        this.animationParser = new AnimationParser(loader);
+        this.faceParser = new FaceParser(loader);
     }
-    getObjects()
-    {
-        if (!this._promise) {
-            this._promise =  this._parse();
-        }
-        return this._promise;
+
+    getObjects(node) {
+        ensure(node, 'objects');
+
+        const context = new Context();
+
+        return this._parseTextures(node, context)
+        .then(() => this._parseAnimations(node, context))
+        .then(() => this._parseObjects(node, context));
     }
-    _createConstructor(blueprint)
-    {
-        if (!blueprint.textures['__default']) {
+
+    _createConstructor(blueprint) {
+        if (!blueprint.textures[DEFAULT]) {
             console.warn('No default texture on blueprint', blueprint.id);
         }
 
@@ -44,7 +62,7 @@ class ObjectParser extends Parser
                 this.geometry = blueprint.geometries[0].clone();
                 this.material = new MeshPhongMaterial({
                     depthWrite: false,
-                    map: this.textures['__default'] && this.textures['__default'].texture,
+                    map: this.textures[DEFAULT] && this.textures[DEFAULT].texture,
                     side: DoubleSide,
                     transparent: true,
                 });
@@ -93,64 +111,33 @@ class ObjectParser extends Parser
 
         return constructor;
     }
-    _getConstructor(type, source)
-    {
+    _getConstructor(type, source) {
         if (type === 'character') {
             const Character = this.loader.entities.resolve(source);
             return Character;
         }
         return Entity;
     }
-    _getTexture(id)
-    {
-        if (id) {
-            if (this._textures[id]) {
-                return this._textures[id];
-            } else {
-                console.error(this._textures);
-                throw new Error('Texture "' + id + '" not defined');
-            }
-        } else if (this._textures['__default']) {
-            return this._textures['__default'];
-        } else {
-            throw new Error('Default texture not defined');
-        }
-    }
-    _parse()
-    {
-        return this._parseTextures().then(textures => {
-            this._textures = textures;
-            return this._parseAnimations();
-        }).then(animations => {
-            this._animations = animations;
-            return this._parseObjects();
-        });
-    }
-    _parseAnimations()
-    {
-        const nodes = find(this._node, 'animations > animation');
-        const animationParser = new AnimationParser();
 
-        const animations = {
-            __default: undefined,
-        };
-
+    _parseAnimations(node, context) {
+        const {animations} = context;
+        const nodes = find(node, 'animations > animation');
         for (let i = 0, node; node = nodes[i++];) {
             const textureId = node.parentNode.getAttribute('texture');
-            const texture = this._getTexture(textureId);
-            const animation = animationParser.parseAnimation(node, texture.size);
-            animations[animation.id || '__default'] = animation;
-            if (animations['__default'] === undefined) {
-                animations['__default'] = animation;
+            const texture = context.getTexture(textureId);
+            const animation = this.animationParser.parseAnimation(node, texture.size);
+            animations.set(animation.id || DEFAULT, animation);
+
+            if (!animations.has(DEFAULT)) {
+                animations.set(DEFAULT, animation);
             }
         }
 
-        return Promise.resolve(animations);
+        return Promise.resolve();
     }
-    _parseObjects()
-    {
-        const objectNodes = children(this._node, 'object');
 
+    _parseObjects(node, context) {
+        const objectNodes = children(node, 'object');
         const tasks = [];
         const objects = {};
         for (let i = 0, node; node = objectNodes[i++];) {
@@ -165,7 +152,7 @@ class ObjectParser extends Parser
                 constructor: null,
             };
 
-            const task = this._parseObject(node).then(blueprint => {
+            const task = this._parseObject(node, context).then(blueprint => {
                 return this._createConstructor(blueprint);
             }).then(constructor => {
                 objects[id].constructor = constructor;
@@ -177,27 +164,30 @@ class ObjectParser extends Parser
             return objects;
         });
     }
-    _parseObject(objectNode)
-    {
+
+    _parseObject(objectNode, {animations, textures}) {
         const type = objectNode.getAttribute('type');
         const source = objectNode.getAttribute('source');
 
         const constructor = this._getConstructor(type, source);
         const objectId = objectNode.getAttribute('id');
 
-        const animations = this._animations;
-        const textures = this._textures;
-
         const blueprint = {
             id: objectId,
             constructor: constructor,
             audio: null,
-            animations: animations,
+            animations: [...animations].reduce((obj, [k, v]) => {
+                obj[k] = v;
+                return obj;
+            }, {}),
             animators: [],
             events: null,
             geometries: [],
             sequences: null,
-            textures: textures,
+            textures: [...textures].reduce((obj, [k, v]) => {
+                obj[k] = v;
+                return obj;
+            }, {}),
             traits: null,
         };
 
@@ -213,9 +203,9 @@ class ObjectParser extends Parser
 
                 if (animators.length) {
                     blueprint.animators.push(...animators);
-                } else if(animations['__default']) {
+                } else if(animations.has(DEFAULT)) {
                     const animator = new UVAnimator();
-                    animator.setAnimation(animations['__default']);
+                    animator.setAnimation(animations.get(DEFAULT));
                     animator.update();
                     blueprint.animators.push(animator);
                 }
@@ -254,8 +244,7 @@ class ObjectParser extends Parser
             return blueprint;
         });
     }
-    _parseObjectAnimationRouter(objectNode)
-    {
+    _parseObjectAnimationRouter(objectNode) {
         const node = objectNode.getElementsByTagName('animation-router')[0];
         if (node) {
             let animationRouter;
@@ -266,8 +255,7 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(null);
     }
-    _parseObjectAudio(objectNode)
-    {
+    _parseObjectAudio(objectNode) {
         const tasks = [];
         const audioDef = {};
         const audioNodes = objectNode.querySelectorAll('audio > *');
@@ -283,8 +271,7 @@ class ObjectParser extends Parser
             return audioDef;
         });
     }
-    _parseObjectCollision(objectNode)
-    {
+    _parseObjectCollision(objectNode) {
         const collisionZones = [];
         const collisionNode = objectNode.getElementsByTagName('collision')[0];
         if (collisionNode) {
@@ -306,8 +293,7 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(collisionZones);
     }
-    _parseObjectEvents(objectNode)
-    {
+    _parseObjectEvents(objectNode) {
         const eventsNode = objectNode.querySelector('events');
         if (eventsNode) {
             const parser = new EventParser(this.loader, eventsNode);
@@ -317,8 +303,7 @@ class ObjectParser extends Parser
             return Promise.resolve([]);
         }
     }
-    _parseObjectTraits(objectNode)
-    {
+    _parseObjectTraits(objectNode) {
         const traits = [];
         const traitParser = new TraitParser(this.loader);
         const traitsNode = objectNode.getElementsByTagName('traits')[0];
@@ -330,8 +315,7 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(traits);
     }
-    _parseObjectSequences(objectNode)
-    {
+    _parseObjectSequences(objectNode) {
         const parser = new SequenceParser();
         const node = objectNode.querySelector('sequences');
         if (node) {
@@ -341,24 +325,23 @@ class ObjectParser extends Parser
             return Promise.resolve([]);
         }
     }
-    _parseTextures()
-    {
-        const nodes = this._node.querySelectorAll('textures > texture');
-        const textures = {
-            __default: undefined,
-        };
+    _parseTextures(node, {textures}) {
+        const nodes = node.querySelectorAll('textures > texture');
         for (let node, i = 0; node = nodes[i++];) {
-            const textureId = node.getAttribute('id') || '__default';
-            textures[textureId] = {
+            const textureId = node.getAttribute('id') || DEFAULT;
+
+            textures.set(textureId, {
                 id: textureId,
                 texture: this.getTexture(node),
                 size: this.getVector2(node, 'w', 'h'),
-            };
-            if (textures['__default'] === undefined) {
-                textures['__default'] = textures[textureId];
+            });
+
+            if (!textures.has(DEFAULT)) {
+                textures.set(DEFAULT, textures.get(textureId));
             }
         }
-        return Promise.resolve(textures);
+
+        return Promise.resolve();
     }
 }
 

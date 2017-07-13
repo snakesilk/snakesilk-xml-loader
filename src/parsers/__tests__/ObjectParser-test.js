@@ -45,8 +45,8 @@ describe('ObjectParser', () => {
         return Promise.resolve(new mocks.Canvas())
       });
 
-      const parser = new ObjectParser(loader, node);
-      return parser.getObjects().then(_o => {objects = _o});
+      const parser = new ObjectParser(loader);
+      return parser.getObjects(node).then(_o => {objects = _o});
     });
 
     afterEach(() => {
@@ -194,8 +194,8 @@ describe('ObjectParser', () => {
         </object>
       </objects>`);
 
-      const parser = new ObjectParser(new Loader(), node);
-      parser.getObjects().then(() => done()).catch(done);
+      const parser = new ObjectParser(new Loader());
+      parser.getObjects(node).then(() => done()).catch(done);
     });
   });
 });

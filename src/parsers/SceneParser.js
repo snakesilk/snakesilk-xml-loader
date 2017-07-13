@@ -54,6 +54,8 @@ class SceneParser extends Parser
 
         super(loader);
 
+        this.objectParser = new ObjectParser(loader);
+
         this._node = node;
         this._scene = null;
         this._objects = {};
@@ -276,8 +278,7 @@ class SceneParser extends Parser
 
         const tasks = [];
         for (let node, i = 0; node = nodes[i++];) {
-            const parser = new ObjectParser(this.loader, node);
-            const task = parser.getObjects().then(objects => {
+            const task = this.objectParser.getObjects(node).then(objects => {
                 Object.assign(this._objects, objects);
             });
             tasks.push(task);

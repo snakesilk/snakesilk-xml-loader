@@ -46,11 +46,11 @@ class FaceParser extends Parser
         if (!animator.name) {
             throw new Error("No default animation defined");
         }
-        if (!animations[animator.name]) {
+        if (!animations.has(animator.name)) {
             throw new Error("Animation " + animator.name + " not defined");
         }
 
-        const animation = animations[animator.name];
+        const animation = animations.get(animator.name);
         animator.setAnimation(animation);
 
         animator.indices = this.parseIndices(faceNode);

@@ -1,5 +1,5 @@
 const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
-const {Animation, UVAnimator, Entity, Objects, UVCoords} = require('@snakesilk/engine');
+const {Animation, UVAnimator, Entity, UVCoords} = require('@snakesilk/engine');
 
 const {children, ensure, find} = require('../util/traverse');
 const Parser = require('./Parser');
@@ -33,7 +33,7 @@ class Context {
     }
 }
 
-class ObjectParser extends Parser
+class EntityParser extends Parser
 {
     constructor(loader) {
         super(loader);
@@ -43,13 +43,13 @@ class ObjectParser extends Parser
     }
 
     getObjects(node) {
-        ensure(node, 'objects');
+        ensure(node, 'entities');
 
         const context = new Context();
 
         return this._parseTextures(node, context)
         .then(() => this._parseAnimations(node, context))
-        .then(() => this._parseObjects(node, context));
+        .then(() => this._parseEntities(node, context));
     }
 
     _createConstructor(blueprint) {
@@ -111,6 +111,7 @@ class ObjectParser extends Parser
 
         return constructor;
     }
+
     _getConstructor(type, source) {
         if (type === 'character') {
             const Character = this.loader.entities.resolve(source);
@@ -136,44 +137,45 @@ class ObjectParser extends Parser
         return Promise.resolve();
     }
 
-    _parseObjects(node, context) {
-        const objectNodes = children(node, 'object');
+    _parseEntities(node, context) {
+        const entityNodes = children(node, 'entity');
         const tasks = [];
-        const objects = {};
-        for (let i = 0, node; node = objectNodes[i++];) {
+        const entities = {};
+        for (let i = 0, node; node = entityNodes[i++];) {
             const id = node.getAttribute('id');
-            if (objects[id]) {
+            if (entities[id]) {
                 console.error(node.outerHTML);
                 throw new Error(`Object id "${id}" already defined`);
             }
 
-            objects[id] = {
+            entities[id] = {
                 node,
                 constructor: null,
             };
 
-            const task = this._parseObject(node, context).then(blueprint => {
+            const task = this._parseEntity(node, context).then(blueprint => {
                 return this._createConstructor(blueprint);
             }).then(constructor => {
-                objects[id].constructor = constructor;
+                entities[id].constructor = constructor;
             });
 
             tasks.push(task);
         }
         return Promise.all(tasks).then(() => {
-            return objects;
+            return entities;
         });
     }
 
-    _parseObject(objectNode, {animations, textures}) {
-        const type = objectNode.getAttribute('type');
-        const source = objectNode.getAttribute('source');
+    _parseEntity(entityNode, {animations, textures})
+    {
+        const type = entityNode.getAttribute('type');
+        const source = entityNode.getAttribute('source');
 
         const constructor = this._getConstructor(type, source);
-        const objectId = objectNode.getAttribute('id');
+        const entityId = entityNode.getAttribute('id');
 
         const blueprint = {
-            id: objectId,
+            id: entityId,
             constructor: constructor,
             audio: null,
             animations: [...animations].reduce((obj, [k, v]) => {
@@ -191,8 +193,8 @@ class ObjectParser extends Parser
             traits: null,
         };
 
-        const geometryNodes = objectNode.getElementsByTagName('geometry');
-        const textNodes = objectNode.getElementsByTagName('text');
+        const geometryNodes = entityNode.getElementsByTagName('geometry');
+        const textNodes = entityNode.getElementsByTagName('text');
         if (geometryNodes.length) {
             for (let i = 0, geometryNode; geometryNode = geometryNodes[i]; ++i) {
                 const geometry = this.getGeometry(geometryNode);
@@ -220,32 +222,34 @@ class ObjectParser extends Parser
         }
 
         return Promise.all([
-            this._parseObjectAnimationRouter(objectNode).then(router => {
+            this._parseEntityAnimationRouter(entityNode).then(router => {
                 if (router) {
                     blueprint.animationRouter = router;
                 }
             }),
-            this._parseObjectCollision(objectNode).then(collision => {
+            this._parseEntityCollision(entityNode).then(collision => {
                 blueprint.collision = collision;
             }),
-            this._parseObjectAudio(objectNode).then(audio => {
+            this._parseEntityAudio(entityNode).then(audio => {
                 blueprint.audio = audio;
             }),
-            this._parseObjectEvents(objectNode).then(events => {
+            this._parseEntityEvents(entityNode).then(events => {
                 blueprint.events = events;
             }),
-            this._parseObjectTraits(objectNode).then(traits => {
+            this._parseEntityTraits(entityNode).then(traits => {
                 blueprint.traits = traits;
             }),
-            this._parseObjectSequences(objectNode).then(sequences => {
+            this._parseEntitySequences(entityNode).then(sequences => {
                 blueprint.sequences = sequences;
             }),
         ]).then(() => {
             return blueprint;
         });
     }
-    _parseObjectAnimationRouter(objectNode) {
-        const node = objectNode.getElementsByTagName('animation-router')[0];
+
+    _parseEntityAnimationRouter(entityNode)
+    {
+        const node = entityNode.getElementsByTagName('animation-router')[0];
         if (node) {
             let animationRouter;
             eval(node.textContent);
@@ -255,10 +259,11 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(null);
     }
-    _parseObjectAudio(objectNode) {
+
+    _parseEntityAudio(entityNode) {
         const tasks = [];
         const audioDef = {};
-        const audioNodes = objectNode.querySelectorAll('audio > *');
+        const audioNodes = entityNode.querySelectorAll('audio > *');
         for (let audioNode, i = 0; audioNode = audioNodes[i++];) {
             const task = this.getAudio(audioNode)
                 .then(audio => {
@@ -271,9 +276,10 @@ class ObjectParser extends Parser
             return audioDef;
         });
     }
-    _parseObjectCollision(objectNode) {
+
+    _parseEntityCollision(entityNode) {
         const collisionZones = [];
-        const collisionNode = objectNode.getElementsByTagName('collision')[0];
+        const collisionNode = entityNode.getElementsByTagName('collision')[0];
         if (collisionNode) {
             const collNodes = collisionNode.getElementsByTagName('*');
             for (let collNode, i = 0; collNode = collNodes[i++];) {
@@ -293,8 +299,9 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(collisionZones);
     }
-    _parseObjectEvents(objectNode) {
-        const eventsNode = objectNode.querySelector('events');
+
+    _parseEntityEvents(entityNode) {
+        const eventsNode = entityNode.querySelector('events');
         if (eventsNode) {
             const parser = new EventParser(this.loader, eventsNode);
             return parser.getEvents();
@@ -303,10 +310,11 @@ class ObjectParser extends Parser
             return Promise.resolve([]);
         }
     }
-    _parseObjectTraits(objectNode) {
+
+    _parseEntityTraits(entityNode) {
         const traits = [];
         const traitParser = new TraitParser(this.loader);
-        const traitsNode = objectNode.getElementsByTagName('traits')[0];
+        const traitsNode = entityNode.getElementsByTagName('traits')[0];
         if (traitsNode) {
             const traitNodes = traitsNode.getElementsByTagName('trait');
             for (let traitNode, i = 0; traitNode = traitNodes[i++];) {
@@ -315,9 +323,10 @@ class ObjectParser extends Parser
         }
         return Promise.resolve(traits);
     }
-    _parseObjectSequences(objectNode) {
+
+    _parseEntitySequences(entityNode) {
         const parser = new SequenceParser();
-        const node = objectNode.querySelector('sequences');
+        const node = entityNode.querySelector('sequences');
         if (node) {
             const sequences = parser.getSequences(node);
             return Promise.resolve(sequences);
@@ -325,6 +334,7 @@ class ObjectParser extends Parser
             return Promise.resolve([]);
         }
     }
+
     _parseTextures(node, {textures}) {
         const nodes = node.querySelectorAll('textures > texture');
         for (let node, i = 0; node = nodes[i++];) {
@@ -345,4 +355,4 @@ class ObjectParser extends Parser
     }
 }
 
-module.exports = ObjectParser;
+module.exports = EntityParser;

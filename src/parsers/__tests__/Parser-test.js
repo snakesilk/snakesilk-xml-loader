@@ -7,8 +7,6 @@ const THREE = require('three');
 const {Entity, World} = require('@snakesilk/engine');
 
 const Parser = require('../Parser');
-const ObjectParser = require('../ObjectParser');
-const TraitParser = require('../TraitParser');
 
 describe('Parser', function() {
   beforeEach(function() {

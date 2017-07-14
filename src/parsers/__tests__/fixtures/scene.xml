@@ -25,7 +25,7 @@
         </path>
     </camera>
 
-    <objects>
+    <entities>
         <textures>
             <texture id="heatman-stage" url="./heatman/tiles.png" w="256" h="128"/>
         </textures>
@@ -179,7 +179,7 @@
             </animation>
         </animations>
 
-        <object id="pho-block">
+        <entity id="pho-block">
             <geometry type="plane" w="16" h="22" w-segments="1" h-segments="1">
                 <face animation="pho"/>
             </geometry>
@@ -189,9 +189,9 @@
             <traits>
                 <trait name="solid"/>
             </traits>
-        </object>
+        </entity>
 
-        <object id="ironwall">
+        <entity id="ironwall">
             <geometry type="plane" w="16" h="32" w-segments="1" h-segments="2">
                 <face animation="destructible-wall">
                     <range x="*" y="*"/>
@@ -203,9 +203,9 @@
             <traits>
                 <trait name="solid"/>
             </traits>
-        </object>
+        </entity>
 
-        <object id="door">
+        <entity id="door">
             <geometry type="plane" w="32" h="64" w-segments="2" h-segments="4">
                 <face animation="door">
                     <range x="*" y="*"/>
@@ -217,9 +217,9 @@
             <traits>
                 <trait name="solid"/>
             </traits>
-        </object>
+        </entity>
 
-        <object id="test">
+        <entity id="test">
             <geometry type="plane" w="64" h="64" w-segments="8" h-segments="8">
                 <face animation="door" index="[22,24]">
                     <range x="1-4" y="1"/>
@@ -227,23 +227,23 @@
                     <range x="*/2" y="4"/>
                 </face>
             </geometry>
-        </object>
+        </entity>
 
-        <object id="json-index-only">
+        <entity id="json-index-only">
             <geometry type="plane" w="64" h="64" w-segments="8" h-segments="8">
                 <face animation="door" index="[0,1,2,3,4,100,112]"/>
             </geometry>
-        </object>
+        </entity>
 
-        <object id="range-index-star">
+        <entity id="range-index-star">
             <geometry type="plane" w="64" h="64" w-segments="4" h-segments="4">
                 <face animation="door">
                     <range x="*" y="*"/>
                 </face>
             </geometry>
-        </object>
+        </entity>
 
-        <object id="upper-level">
+        <entity id="upper-level">
             <geometry type="plane" w="2048" h="240" w-segments="128" h-segments="15">
                 <face animation="darkness">
                     <range x="*" y="*"/>
@@ -373,31 +373,31 @@
                     <range x="126" y="13-15"/>
                 </face>
             </geometry>
-        </object>
+        </entity>
 
-        <object id="drwily-sign">
+        <entity id="drwily-sign">
             <geometry type="plane" w="32" h="32" w-segments="1" h-segments="1">
                 <face animation="dr-wily-sign" index="[0]"/>
             </geometry>
-        </object>
-    </objects>
+        </entity>
+    </entities>
     <layout>
-        <objects>
-            <object id="test" instance-id="my-test-object" x="13" y="-17" z="-0.1"/>
-            <object id="json-index-only" instance-id="json-index-only"/>
-            <object id="range-index-star"/>
+        <entities>
+            <entity id="test" instance-id="my-test-entity" x="13" y="-17" z="-0.1"/>
+            <entity id="json-index-only" instance-id="json-index-only"/>
+            <entity id="range-index-star"/>
 
-            <object id="upper-level" x="1024" y="-120" z="-0.1"/>
-            <object id="door" x="4608" y="-1088"/>
-            <object id="door" x="4864" y="-1088"/>
+            <entity id="upper-level" x="1024" y="-120" z="-0.1"/>
+            <entity id="door" x="4608" y="-1088"/>
+            <entity id="door" x="4864" y="-1088"/>
 
-            <object id="pho-block" x="4312" y="-584">
+            <entity id="pho-block" x="4312" y="-584">
                 <trait name="disappearing" off="6" on="2" offset="-18.5"/>
-            </object>
+            </entity>
 
-            <object id="ironwall" x="2648" y="-624"/>
-            <object id="drwily-sign" x="4592" y="-1024" z="0"/>
-        </objects>
+            <entity id="ironwall" x="2648" y="-624"/>
+            <entity id="drwily-sign" x="4592" y="-1024" z="0"/>
+        </entities>
         <spawner x="680" y="-88" interval="4" simultaneous="2">
             <character id="Telly"/>
         </spawner>

@@ -200,10 +200,10 @@ describe('SceneParser', () => {
           });
         });
 
-        describe('Object Parsing', () => {
+        describe('Entity parsing', () => {
           it('should name object', () => {
-            const object = scene.world.getObject('my-test-object');
-            expect(object.id).to.equal('my-test-object');
+            const object = scene.world.getObject('my-test-entity');
+            expect(object.id).to.equal('my-test-entity');
             expect(object.name).to.equal('test');
           });
         });

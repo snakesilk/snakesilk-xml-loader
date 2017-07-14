@@ -19,7 +19,6 @@ class EventParser extends Parser
         return Promise.all([
             this.parseEvents(node, context),
         ]).then(() => {
-            console.log(context);
             return context;
         });
     }

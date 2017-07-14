@@ -20,7 +20,8 @@ class XMLLoader extends Loader
     loadScene(url) {
         return this.asyncLoadXML(url).then(doc => {
             const sceneNode = doc.querySelector('scene');
-            return this.parseScene(sceneNode);
+            return this.parseScene(sceneNode)
+            .then(context => context.scene);
         });
     }
 

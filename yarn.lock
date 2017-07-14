@@ -18,7 +18,7 @@
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@snakesilk/platform-traits/-/platform-traits-0.1.1.tgz#6f9bc305f4097751346d26593ab7e1a79f15ce6e"
   dependencies:
-    "@snakesilk/engine" "^0.8.0"
+    "@snakesilk/engine" "^0.10.0"
 
 "@snakesilk/testing@^0.2.1":
   version "0.2.1"

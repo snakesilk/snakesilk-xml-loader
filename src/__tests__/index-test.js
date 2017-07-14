@@ -17,6 +17,10 @@ describe('Main Export', function() {
       expect(Main.Parser).to.be(require('../parsers/Parser'));
     });
 
+    it('exports Util', () => {
+      expect(Main.Util).to.be(require('../util/traverse'));
+    });
+
     it('exports EntityParser', () => {
       expect(Main.Parser.EntityParser).to.be(require('../parsers/EntityParser'));
     });

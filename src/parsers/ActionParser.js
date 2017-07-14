@@ -80,8 +80,8 @@ class ActionParser extends Parser
         }
 
         const ids = [];
-        const objectNodes = node.querySelectorAll('object');
-        for (let node, i = 0; node = objectNodes[i]; ++i) {
+        const entityNodes = node.querySelectorAll('entity');
+        for (let node, i = 0; node = entityNodes[i]; ++i) {
             const id = this.getAttr(node, 'instance-id');
             ids.push(id);
         }
@@ -90,12 +90,12 @@ class ActionParser extends Parser
             const world = this.world;
             const tasks = [];
             ids.forEach(id => {
-                const object = world.getObject(id);
-                if (!object) {
-                    throw new Error(`Object instance "${id}" not defined`);
+                const entity = world.getObject(id);
+                if (!entity) {
+                    throw new Error(`Entity instance "${id}" not defined`);
                 }
                 operations.forEach(operation => {
-                    const task = operation(object);
+                    const task = operation(entity);
                     tasks.push(task);
                 });
             });

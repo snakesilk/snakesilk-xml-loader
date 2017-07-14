@@ -1,5 +1,5 @@
-<objects>
-    <object type="character" source="MyGuy" id="GIJoe">
+<entities>
+    <entity type="character" source="MyGuy" id="GIJoe">
         <geometry type="plane" w="48" h="48" />
 
         <collision>
@@ -15,7 +15,7 @@
                 return 'test-value-is-fubar';
             }
         </animation-router>
-    </object>
+    </entity>
 
     <animations w="48" h="48" texture="megaman-p">
         <animation id="idle">
@@ -94,4 +94,4 @@
             </effects>
         </texture>
     </textures>
-</objects>
+</entities>

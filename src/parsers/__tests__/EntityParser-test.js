@@ -4,11 +4,11 @@ const mocks = require('@snakesilk/testing/mocks');
 const {createNode, readXMLFile} = require('@snakesilk/testing/xml');
 
 const {Animation, Entity, Loader, Objects, Trait, UVCoords} = require('@snakesilk/engine');
-const ObjectParser = require('../ObjectParser');
+const EntityParser = require('../EntityParser');
 
 const {createFakeTraitFactory} = require('./helpers');
 
-describe('ObjectParser', () => {
+describe('EntityParser', () => {
   let loader;
 
   /* Support transpiled code extending. */
@@ -45,7 +45,7 @@ describe('ObjectParser', () => {
         return Promise.resolve(new mocks.Canvas())
       });
 
-      const parser = new ObjectParser(loader);
+      const parser = new EntityParser(loader);
       return parser.getObjects(node).then(_o => {objects = _o});
     });
 
@@ -66,7 +66,7 @@ describe('ObjectParser', () => {
       });
 
       it('contains reference to parsed node', () => {
-        expect(candidate.node).to.be(node.querySelector('object[id=GIJoe]'));
+        expect(candidate.node).to.be(node.querySelector('entity[id=GIJoe]'));
       });
 
       it('containes a constructor for object', () => {
@@ -150,7 +150,7 @@ describe('ObjectParser', () => {
 
     it('should return an object indexed by texture names', () => {
       const texturesNode = getNode('textures');
-      const parser = new ObjectParser(loaderMock);
+      const parser = new EntityParser(loaderMock);
       textures = parser.parseTextures(texturesNode);
       expect(textures).to.be.an(Object);
       expect(textures).to.have.property('moot');
@@ -181,20 +181,20 @@ describe('ObjectParser', () => {
 
   describe('Regression Tests', () => {
     it('only finds first hand object nodes', (done) => {
-      const node = createNode(`<objects>
-        <object id="CollidableName"/>
+      const node = createNode(`<entities>
+        <entity id="CollidableName"/>
 
-        <object id="UniqueName">
+        <entity id="UniqueName">
           <node1>
-            <object id="CollidableName"/>
+            <entity id="CollidableName"/>
             <node2>
-              <object id="CollidableName"/>
+              <entity id="CollidableName"/>
             </node2>
           </node1>
-        </object>
-      </objects>`);
+        </entity>
+      </entities>`);
 
-      const parser = new ObjectParser(new Loader());
+      const parser = new EntityParser(new Loader());
       parser.getObjects(node).then(() => done()).catch(done);
     });
   });

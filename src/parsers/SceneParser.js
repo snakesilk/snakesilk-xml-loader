@@ -10,7 +10,7 @@ const {children, find, ensure} = require('../util/traverse');
 const Parser = require('./Parser');
 const CameraParser = require('./CameraParser');
 const EventParser = require('./EventParser');
-const ObjectParser = require('./ObjectParser');
+const EntityParser = require('./EntityParser');
 const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
 
@@ -54,11 +54,12 @@ class SceneParser extends Parser
 
         super(loader);
 
-        this.objectParser = new ObjectParser(loader);
+        this.entityParser = new EntityParser(loader);
+        this.traitParser = new TraitParser(loader);
 
         this._node = node;
         this._scene = null;
-        this._objects = {};
+        this._entities = {};
         this._bevahiorObjects = [];
         this._layoutObjects = [];
     }
@@ -107,12 +108,12 @@ class SceneParser extends Parser
     _getObject(id)
     {
         const resource = this.loader.resourceManager;
-        if (this._objects[id]) {
-            return this._objects[id];
-        } else if (resource.has('object', id)) {
-            return {constructor: resource.get('object', id)};
+        if (this._entities[id]) {
+            return this._entities[id];
+        } else if (resource.has('entity', id)) {
+            return {constructor: resource.get('entity', id)};
         }
-        throw new Error(`Object "${id}" not defined.`);
+        throw new Error(`Entity "${id}" not defined.`);
     }
     _parse()
     {
@@ -223,10 +224,10 @@ class SceneParser extends Parser
     }
     _parseLayout()
     {
-        const objectNodes = find(this._node, 'layout > objects > object');
+        const entityNodes = find(this._node, 'layout > entities > entity');
         const world = this._scene.world;
-        for (let objectNode, i = 0; objectNode = objectNodes[i]; ++i) {
-            const layoutObject = this._parseLayoutObject(objectNode);
+        for (let entityNode, i = 0; entityNode = entityNodes[i]; ++i) {
+            const layoutObject = this._parseLayoutObject(entityNode);
             world.addObject(layoutObject.instance);
             this._layoutObjects.push(layoutObject);
         }
@@ -237,7 +238,7 @@ class SceneParser extends Parser
         const objectId = node.getAttribute('id');
         const instanceId = node.getAttribute('instance-id');
         const object = this._getObject(objectId);
-        const instance = new object.constructor;
+        const instance = new object.constructor();
         instance.id = instanceId;
 
         const direction = this.getInt(node, 'dir') || 1;
@@ -253,10 +254,9 @@ class SceneParser extends Parser
 
         const traitNodes = node.getElementsByTagName('trait');
         if (traitNodes) {
-            const traitParser = new TraitParser(this.loader);
             const traits = [];
             for (let traitNode, i = 0; traitNode = traitNodes[i++];) {
-                const Trait = traitParser.parseTrait(traitNode);
+                const Trait = this.traitParser.parseTrait(traitNode);
                 const trait = new Trait;
                 instance.applyTrait(trait);
             }
@@ -271,15 +271,16 @@ class SceneParser extends Parser
     }
     _parseObjects()
     {
-        const nodes = children(this._node, 'objects');
+        const nodes = children(this._node, 'entities');
         if (!nodes.length) {
             return Promise.resolve();
         }
 
         const tasks = [];
         for (let node, i = 0; node = nodes[i++];) {
-            const task = this.objectParser.getObjects(node).then(objects => {
-                Object.assign(this._objects, objects);
+            const task = this.entityParser.getObjects(node)
+            .then(objects => {
+                Object.assign(this._entities, objects);
             });
             tasks.push(task);
         }

@@ -1,18 +1,15 @@
 const {Easing, SyncPromise, Tween} = require('@snakesilk/engine');
 
-const {children} = require('../util/traverse');
+const {children, ensure} = require('../util/traverse');
 const Parser = require('./Parser');
+
+const DEGTORAD = Math.PI / 180;
 
 class ActionParser extends Parser
 {
-    constructor()
-    {
-        super();
+    getAction(node) {
+        ensure(node, 'action');
 
-        this.DEGTORAD = Math.PI / 180;
-    }
-    getAction(node)
-    {
         const conditionNodes = children(node, 'condition');
         const conditions = [];
         for (let conditionNode, j = 0; conditionNode = conditionNodes[j++];) {
@@ -38,8 +35,8 @@ class ActionParser extends Parser
 
         return callback;
     }
-    getEasing(node, attr)
-    {
+
+    getEasing(node, attr) {
         const aggr = this.getAttr(node, attr);
         if (aggr) {
             const comp = aggr.split(',');
@@ -54,8 +51,8 @@ class ActionParser extends Parser
             return Easing.linear();
         }
     }
-    _parseActionCameraMove(node)
-    {
+
+    _parseActionCameraMove(node) {
         const to = this.getVector3(node, 'to');
         const tweenNode = node.querySelector(':scope > tween');
         if (tweenNode) {
@@ -70,8 +67,8 @@ class ActionParser extends Parser
             };
         }
     }
-    _parseActionTransform(node)
-    {
+
+    _parseActionTransform(node) {
         const operations = [];
         const transNodes = node.querySelectorAll('opacity, position, rotation, scale');
         for (let node, i = 0; node = transNodes[i]; ++i) {
@@ -102,8 +99,8 @@ class ActionParser extends Parser
             return SyncPromise.all(tasks);
         };
     }
-    _parseTransformation(node)
-    {
+
+    _parseTransformation(node) {
         let duration = 0;
         let easing;
         if (node.parentNode.tagName === 'tween') {
@@ -134,7 +131,7 @@ class ActionParser extends Parser
             const to = this.getVector3(node, 'to');
             Object.keys(to).forEach(key => {
                 if (to[key]) {
-                    to[key] *= this.DEGTORAD;
+                    to[key] *= DEGTORAD;
                 }
             });
             return function rotationTransform(object) {
@@ -153,8 +150,8 @@ class ActionParser extends Parser
             };
         }
     }
-    _resolveFunction(node)
-    {
+
+    _resolveFunction(node) {
         const type = this.getAttr(node, 'type');
 
         if (type === 'camera-move') {

@@ -16,8 +16,8 @@ describe('SceneParser', () => {
 
   class AudioMock{};
 
-  function parseScene(parser) {
-    return parser.getScene().then(_s => {scene = _s});
+  function parseScene(parser, node) {
+    return parser.getScene(node).then(context => {scene = context.scene});
   }
 
   describe(`when <audio> present`, () => {
@@ -35,8 +35,8 @@ describe('SceneParser', () => {
         return Promise.resolve(mockAudio);
       });
 
-      const parser = new SceneParser(loader, node);
-      return parseScene(parser);
+      const parser = new SceneParser(loader);
+      return parseScene(parser, node);
     });
 
     it('fetches audio from "src"', () => {
@@ -72,8 +72,8 @@ describe('SceneParser', () => {
             </behaviors>
           </layout>
         </scene>`);
-        const parser = new SceneParser(new Loader(), node);
-        return parseScene(parser);
+        const parser = new SceneParser(new Loader());
+        return parseScene(parser, node);
       });
 
       it(`has only ${tag} in world`, () => {
@@ -128,8 +128,8 @@ describe('SceneParser', () => {
 
       sinon.stub(World.prototype, 'simulateTime');
 
-      const parser = new SceneParser(loader, node);
-      return parseScene(parser);
+      const parser = new SceneParser(loader);
+      return parseScene(parser, node);
     });
 
     afterEach(() => {

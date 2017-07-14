@@ -3,12 +3,11 @@ const SceneParser = require('./parsers/SceneParser');
 
 class XMLLoader extends Loader
 {
-    asyncLoadXML(url)
-    {
+    asyncLoadXML(url) {
         return this.resourceLoader.loadXML(url);
     }
-    followNode(node)
-    {
+
+    followNode(node) {
         const url = this.resolveURL(node, 'src');
         if (!url) {
             return Promise.resolve(node);
@@ -17,20 +16,20 @@ class XMLLoader extends Loader
             return doc.children[0];
         });
     }
-    loadScene(url)
-    {
+
+    loadScene(url) {
         return this.asyncLoadXML(url).then(doc => {
             const sceneNode = doc.querySelector('scene');
             return this.parseScene(sceneNode);
         });
     }
-    parseScene(node)
-    {
-        const parser = new SceneParser(this, node);
-        return parser.getScene();
+
+    parseScene(node) {
+        const parser = new SceneParser(this);
+        return parser.getScene(node);
     }
-    resolveURL(node, attr)
-    {
+
+    resolveURL(node, attr) {
         const url = node.getAttribute(attr || 'url');
         if (!url) {
             return null;

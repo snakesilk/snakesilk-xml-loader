@@ -1,10 +1,10 @@
 function ensure(node, selector) {
-    if (!node.tagName) {
+    if (typeof node !== 'object' || !node.tagName) {
         throw new TypeError(`${node} is not an XML node`);
     }
 
     if (!node.matches(selector)) {
-        throw new TypeError(`${node.outerHTML} must match selector "${selector}"`);
+        throw new TypeError(`${node.outerHTML.substr(0, 64)} must match selector "${selector}"`);
     }
 }
 

@@ -39,6 +39,7 @@ class EntityParser extends Parser
         super(loader);
 
         this.animationParser = new AnimationParser(loader);
+        this.eventParser = new EventParser(loader);
         this.faceParser = new FaceParser(loader);
     }
 
@@ -138,6 +139,8 @@ class EntityParser extends Parser
     }
 
     _parseEntities(node, context) {
+        ensure(node, 'entities');
+
         const entityNodes = children(node, 'entity');
         const tasks = [];
         const entities = {};
@@ -301,10 +304,12 @@ class EntityParser extends Parser
     }
 
     _parseEntityEvents(entityNode) {
+        ensure(entityNode, 'entity');
+
         const eventsNode = entityNode.querySelector('events');
         if (eventsNode) {
-            const parser = new EventParser(this.loader, eventsNode);
-            return parser.getEvents();
+            return this.eventParser.getEvents(eventsNode)
+            .then(({events}) => events);
         }
         else {
             return Promise.resolve([]);

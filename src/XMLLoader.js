@@ -1,5 +1,4 @@
 const {Loader} = require('@snakesilk/engine');
-const SceneParser = require('./parsers/SceneParser');
 
 class XMLLoader extends Loader
 {
@@ -15,19 +14,6 @@ class XMLLoader extends Loader
         return this.asyncLoadXML(url).then(doc => {
             return doc.children[0];
         });
-    }
-
-    loadScene(url) {
-        return this.asyncLoadXML(url).then(doc => {
-            const sceneNode = doc.querySelector('scene');
-            return this.parseScene(sceneNode)
-            .then(context => context.scene);
-        });
-    }
-
-    parseScene(node) {
-        const parser = new SceneParser(this);
-        return parser.getScene(node);
     }
 
     resolveURL(node, attr) {

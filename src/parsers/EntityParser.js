@@ -180,14 +180,11 @@ class EntityParser extends Parser
         const entityId = entityNode.getAttribute('id');
 
         const blueprint = {
+            constructor,
+            animations,
             textures,
             id: entityId,
-            constructor: constructor,
             audio: null,
-            animations: [...animations].reduce((obj, [k, v]) => {
-                obj[k] = v;
-                return obj;
-            }, {}),
             animators: [],
             events: null,
             geometries: [],

@@ -78,11 +78,9 @@ class EntityParser extends Parser
                 this.applyTrait(new Trait());
             });
 
-            /* Run initial update of all UV maps. */
             blueprint.animators.forEach(anim => {
                 const animator = anim.clone();
                 animator.addGeometry(this.geometry);
-                animator.update();
                 this.animators.push(animator);
             });
 
@@ -101,6 +99,9 @@ class EntityParser extends Parser
             blueprint.sequences.forEach(seq => {
                 this.sequencer.addSequence(seq.id, seq.sequence);
             });
+
+            /* Run initial update of all UV maps. */
+            this.updateAnimators(0);
         });
 
         constructor.prototype.animations = blueprint.animations;
@@ -212,7 +213,6 @@ class EntityParser extends Parser
                 } else if(animations.has(DEFAULT)) {
                     const animator = new UVAnimator();
                     animator.setAnimation(animations.get(DEFAULT));
-                    animator.update();
                     blueprint.animators.push(animator);
                 }
             }

@@ -95,6 +95,16 @@ describe('EntityParser', () => {
           .to.be(instance.animations.get('idle'));
         });
 
+        describe('#setAnimsetAnimation', () => {
+          it('sets specified animation by name successfully', () => {
+            instance.setAnimation('run');
+            instance.updateAnimators(0);
+            const uvs = instance.animations.get('run').getValue(0);
+            expect(instance.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);
+            expect(instance.model.geometry.faceVertexUvs[0][1]).to.eql(uvs[1]);
+          });
+        });
+
         it('has traits', () => {
           expect(instance.traits.length).to.be(2);
           expect(instance.jump).to.be.ok();

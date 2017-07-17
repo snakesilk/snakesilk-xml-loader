@@ -3,6 +3,7 @@ const sinon = require('sinon');
 const mocks = require('@snakesilk/testing/mocks');
 const {createNode, readXMLFile} = require('@snakesilk/testing/xml');
 
+const {Texture} = require('three');
 const {Animation, Entity, Loader, Objects, Trait, UVCoords} = require('@snakesilk/engine');
 const EntityParser = require('../EntityParser');
 
@@ -24,6 +25,7 @@ describe('EntityParser', () => {
   });
 
   describe('#getObjects', () => {
+    const MOCK_CANVAS = new mocks.Canvas();
     let node, objects;
 
     before(() => {
@@ -34,7 +36,7 @@ describe('EntityParser', () => {
       mocks.Image.mock();
 
       sinon.stub(loader.resourceLoader, 'loadImage', () => {
-        return Promise.resolve(new mocks.Canvas())
+        return Promise.resolve(MOCK_CANVAS)
       });
 
       const parser = new EntityParser(loader);
@@ -140,41 +142,48 @@ describe('EntityParser', () => {
             expect(instance.animations['run-fire'].group).to.be('run');
           });
         });
+
+        describe('Textures', () => {
+          let textures;
+
+          it('is a Map', () => {
+            expect(instance.textures).to.be.a(Map);
+          });
+
+          it('are indexed by texture names', () => {
+            expect(instance.textures.has('headlight_lensflare')).to.be(true);
+            expect(instance.textures.has('megaman-p')).to.be(true);
+            expect(instance.textures.has('megaman-a')).to.be(true);
+            expect(instance.textures.has('megaman-b')).to.be(true);
+            expect(instance.textures.has('megaman-c')).to.be(true);
+            expect(instance.textures.has('megaman-f')).to.be(true);
+            expect(instance.textures.has('megaman-h')).to.be(true);
+            expect(instance.textures.has('megaman-m')).to.be(true);
+            expect(instance.textures.has('megaman-q')).to.be(true);
+            expect(instance.textures.has('megaman-w')).to.be(true);
+            expect(instance.textures.has('megaman-m')).to.be(true);
+          });
+
+          it('provide texture size', () => {
+            expect(instance.textures.get('megaman-p').size).to.eql({x: 256, y: 256});
+            expect(instance.textures.get('headlight_lensflare').size).to.eql({x: 256, y: 128});
+          });
+
+          it('provide texture instances', () => {
+            expect(instance.textures.get('megaman-p').texture).to.be.a(Texture);
+            expect(instance.textures.get('headlight_lensflare').texture).to.be.a(Texture);
+          });
+
+          it('should have the first found texture as default', () => {
+            expect(instance.textures.get('__default'))
+            .to.be(instance.textures.get('headlight_lensflare'));
+          });
+
+          it('uses specified image', () => {
+            expect(instance.textures.get('__default').texture.image).to.be(MOCK_CANVAS);
+          });
+        });
       });
-    });
-  });
-
-  describe.skip('#parseTextures', () => {
-    let textures, character;
-
-    it('should return an object indexed by texture names', () => {
-      const texturesNode = getNode('textures');
-      const parser = new EntityParser(loaderMock);
-      textures = parser.parseTextures(texturesNode);
-      expect(textures).to.be.an(Object);
-      expect(textures).to.have.property('moot');
-      expect(textures).to.have.property('foo');
-      expect(textures).to.have.property('bar');
-    });
-
-    it('should provide texture size', () => {
-      expect(textures['moot'].size).to.eql({x: 256, y: 128});
-      expect(textures['foo'].size).to.eql({x: 129, y: 256});
-      expect(textures['bar'].size).to.eql({x: 64, y: 96});
-    });
-
-    it('should provide texture instances', () => {
-      expect(textures['moot'].texture).to.be.a(THREE.Texture);
-      expect(textures['foo'].texture).to.be.a(THREE.Texture);
-      expect(textures['bar'].texture).to.be.a(THREE.Texture);
-    });
-
-    it('should have the first found texture as default', () => {
-      expect(textures['__default']).to.be(textures['moot']);
-    });
-
-    it.skip('should load images', () => {
-      expect(textures['moot'].texture.image.src).to.equal('moot.png');
     });
   });
 
@@ -198,3 +207,4 @@ describe('EntityParser', () => {
     });
   });
 });
+

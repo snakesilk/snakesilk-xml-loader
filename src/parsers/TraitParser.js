@@ -1,3 +1,4 @@
+const {ensure} = require('../util/traverse');
 const Parser = require('./Parser');
 
 class TraitParser extends Parser
@@ -39,12 +40,19 @@ class TraitParser extends Parser
     }
 
     parseTrait(node) {
-        const name = this.getAttr(node, 'name');
+        const name = this.getAttr(node, 'name') || node.tagName;
         const factory = this.loader.traits.resolve(name);
         if (!factory) {
             throw new TypeError(`Trait factory "${name}" does not exist.`);
         }
         return factory(this, node);
+    }
+
+    parseTraits(node) {
+        ensure(node, 'traits');
+        return [...node.children].map(node => {
+            return this.parseTrait(node);
+        });
     }
 }
 

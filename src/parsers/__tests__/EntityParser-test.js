@@ -11,18 +11,10 @@ const {createFakeTraitFactory} = require('./helpers');
 describe('EntityParser', () => {
   let loader;
 
-  /* Support transpiled code extending. */
-  function MyGuy() {
-    const entity = new Entity();
-    Object.assign(this, entity);
-  };
-  MyGuy.prototype = Object.create(Entity.prototype);
-  MyGuy.prototype.constructor = Entity;
-
   beforeEach(() => {
     loader = new Loader();
     loader.entities.add({
-      'MyGuy': MyGuy,
+      'MyGuy': Entity,
     });
 
     loader.traits.add({

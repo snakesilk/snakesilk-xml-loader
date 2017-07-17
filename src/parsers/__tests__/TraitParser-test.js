@@ -64,32 +64,78 @@ describe('TraitParser', () => {
     });
   });
 
-  describe('#parseTrait', () => {
-    describe('when trait has been registered', () => {
-      const MOCK_CONSTRUCTOR = Symbol('mock constructor');
-      let constructor, factory, node;
+  describe('#parseTraits', () => {
+    describe('when node illegal', () => {
+      it('throws an exception', () => {
+        expect(() => {
+          parser.parseTraits(createNode('<invalid/>'));
+        }).to.throwError(error => {
+          expect(error.message).to.be('<invalid></invalid> must match selector "traits"');
+        });
+      });
+    });
+
+    describe('when node valid', () => {
+      let result, node;
 
       beforeEach(() => {
-        factory = sinon.stub().returns(MOCK_CONSTRUCTOR);
+        sinon.stub(parser, 'parseTrait')
+          .onCall(0).returns('result a')
+          .onCall(1).returns('result b');
 
-        loader.traits.add({
-          'my-trait': factory,
+        node = createNode(`<traits>
+          <trait name="test"/>
+          <test/>
+        </traits>`);
+
+        result = parser.parseTraits(node);
+      });
+
+      it('calls #parseTrait for every child node', () => {
+        expect(parser.parseTrait.callCount).to.be(2);
+        expect(parser.parseTrait.getCall(0).args[0]).to.be(node.children[0]);
+        expect(parser.parseTrait.getCall(1).args[0]).to.be(node.children[1]);
+      });
+
+      it('returns all return values from #parseTrait', () => {
+        expect(result[0]).to.be('result a');
+        expect(result[1]).to.be('result b');
+      });
+    });
+  });
+
+  describe('#parseTrait', () => {
+    describe('when trait has been registered', () => {
+      [
+        `<my-trait/>`,
+        `<trait name="my-trait"/>`,
+      ].forEach(xml => {
+        describe(`using node format ${xml}`, () => {
+          const MOCK_CONSTRUCTOR = Symbol('mock constructor');
+          let constructor, factory, node;
+
+          beforeEach(() => {
+            factory = sinon.stub().returns(MOCK_CONSTRUCTOR);
+
+            loader.traits.add({
+              'my-trait': factory,
+            });
+            node = createNode(xml);
+            constructor = parser.parseTrait(node);
+          });
+
+          it('returns constructor created by factory', () => {
+            expect(constructor).to.be(MOCK_CONSTRUCTOR);
+          });
+
+          it('calls factory with Parser instance and node', () => {
+            expect(factory.callCount).to.be(1);
+            expect(factory.lastCall.args).to.eql([
+              parser,
+              node,
+            ]);
+          });
         });
-
-        node = createNode(`<trait name='my-trait'/>`);
-        constructor = parser.parseTrait(node);
-      });
-
-      it('returns constructor created by factory', () => {
-        expect(constructor).to.be(MOCK_CONSTRUCTOR);
-      });
-
-      it('calls factory with Parser instance and node', () => {
-        expect(factory.callCount).to.be(1);
-        expect(factory.lastCall.args).to.eql([
-          parser,
-          node,
-        ]);
       });
     });
   });

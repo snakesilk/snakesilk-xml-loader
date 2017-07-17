@@ -100,6 +100,12 @@ describe('EntityParser', () => {
               .to.be(instance.animations['idle']);
         });
 
+        it('has traits', () => {
+          expect(instance.traits.length).to.be(2);
+          expect(instance.jump).to.be.ok();
+          expect(instance.physics).to.be.ok();
+        });
+
         it.skip('has default animation applied', () => {
           const uvs = instance.animations['__default'].getValue(0);
           expect(instance.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);

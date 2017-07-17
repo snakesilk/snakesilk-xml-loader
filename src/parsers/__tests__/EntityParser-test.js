@@ -106,7 +106,7 @@ describe('EntityParser', () => {
           expect(instance.physics).to.be.ok();
         });
 
-        it.skip('has default animation applied', () => {
+        it('has default animation applied', () => {
           const uvs = instance.animations['__default'].getValue(0);
           expect(instance.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);
           expect(instance.model.geometry.faceVertexUvs[0][1]).to.eql(uvs[1]);

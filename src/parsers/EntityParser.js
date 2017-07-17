@@ -63,9 +63,7 @@ class EntityParser extends Parser
             console.warn('No default texture on blueprint', blueprint.id);
         }
 
-        return this.createObject(blueprint.id,
-                                 blueprint.constructor,
-                                 function EntityConstructor() {
+        function EntityConstructor() {
             blueprint.constructor.call(this);
 
             this.name = blueprint.id;
@@ -122,7 +120,11 @@ class EntityParser extends Parser
 
             /* Run initial update of all UV maps. */
             this.updateAnimators(0);
-        });
+        }
+
+        return this.createObject(blueprint.id,
+                                 blueprint.constructor,
+                                 EntityConstructor)
     }
 
     getConstructor(type, source) {

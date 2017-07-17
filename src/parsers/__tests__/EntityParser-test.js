@@ -85,13 +85,14 @@ describe('EntityParser', () => {
 
         ['idle', 'run', 'run-fire'].forEach(name => {
           it(`contains "${name}" animation`, () => {
-            expect(instance.animations[name]).to.be.an(Animation);
+            expect(instance.animations.get(name)).to.be.an(Animation);
           });
         });
 
         it('has default animation', () => {
-            expect(instance.animations['__default'])
-              .to.be(instance.animations['idle']);
+          expect(instance.animations.has('__default')).to.be(true);
+          expect(instance.animations.get('__default'))
+          .to.be(instance.animations.get('idle'));
         });
 
         it('has traits', () => {
@@ -101,22 +102,24 @@ describe('EntityParser', () => {
         });
 
         it('has default animation applied', () => {
-          const uvs = instance.animations['__default'].getValue(0);
+          const uvs = instance.animations.get('__default').getValue(0);
           expect(instance.model.geometry.faceVertexUvs[0][0]).to.eql(uvs[0]);
           expect(instance.model.geometry.faceVertexUvs[0][1]).to.eql(uvs[1]);
         });
 
         it.skip('should take out face indices properly', function() {
           const object = scene.world.getObject('json-index-only');
-          expect(object.animators[0].indices).to.eql([0, 1, 2, 3, 4, 100, 112]);
+          expect(object.animators[0].indices)
+          .to.eql([0, 1, 2, 3, 4, 100, 112]);
           object = scene.world.getObject('range-index-star');
-          expect(object.animators[0].indices).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
+          expect(object.animators[0].indices)
+          .to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
         });
 
         describe('Animations', () => {
           it('have correct UV maps', () => {
             console.log();
-            const uvs = instance.animations['idle'].getValue(0);
+            const uvs = instance.animations.get('idle').getValue(0);
             expect(uvs).to.be.an(Array);
             expect(uvs[0][0].x).to.equal(0);
             expect(uvs[0][0].y).to.equal(1);
@@ -134,12 +137,12 @@ describe('EntityParser', () => {
           });
 
           it('have group set to null if not specified', () => {
-            expect(instance.animations['idle'].group).to.be(null);
+            expect(instance.animations.get('idle').group).to.be(null);
           });
 
           it('have group set to string if specified', () => {
-            expect(instance.animations['run'].group).to.be('run');
-            expect(instance.animations['run-fire'].group).to.be('run');
+            expect(instance.animations.get('run').group).to.be('run');
+            expect(instance.animations.get('run-fire').group).to.be('run');
           });
         });
 

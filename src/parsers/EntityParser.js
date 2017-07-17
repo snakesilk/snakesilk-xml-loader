@@ -41,6 +41,7 @@ class EntityParser extends Parser
         this.animationParser = new AnimationParser(loader);
         this.eventParser = new EventParser(loader);
         this.faceParser = new FaceParser(loader);
+        this.traitParser = new TraitParser(loader);
     }
 
     getObjects(node) {
@@ -48,12 +49,12 @@ class EntityParser extends Parser
 
         const context = new Context();
 
-        return this._parseTextures(node, context)
-        .then(() => this._parseAnimations(node, context))
-        .then(() => this._parseEntities(node, context));
+        return this.parseTextures(node, context)
+        .then(() => this.parseAnimations(node, context))
+        .then(() => this.parseEntities(node, context));
     }
 
-    _createConstructor(blueprint) {
+    createConstructor(blueprint) {
         if (!blueprint.textures[DEFAULT]) {
             console.warn('No default texture on blueprint', blueprint.id);
         }
@@ -113,7 +114,7 @@ class EntityParser extends Parser
         return constructor;
     }
 
-    _getConstructor(type, source) {
+    getConstructor(type, source) {
         if (type === 'character') {
             const Character = this.loader.entities.resolve(source);
             return Character;
@@ -121,7 +122,7 @@ class EntityParser extends Parser
         return Entity;
     }
 
-    _parseAnimations(node, context) {
+    parseAnimations(node, context) {
         const {animations} = context;
         const nodes = find(node, 'animations > animation');
         for (let i = 0, node; node = nodes[i++];) {
@@ -138,7 +139,7 @@ class EntityParser extends Parser
         return Promise.resolve();
     }
 
-    _parseEntities(node, context) {
+    parseEntities(node, context) {
         ensure(node, 'entities');
 
         const entityNodes = children(node, 'entity');
@@ -156,8 +157,8 @@ class EntityParser extends Parser
                 constructor: null,
             };
 
-            const task = this._parseEntity(node, context).then(blueprint => {
-                return this._createConstructor(blueprint);
+            const task = this.parseEntity(node, context).then(blueprint => {
+                return this.createConstructor(blueprint);
             }).then(constructor => {
                 entities[id].constructor = constructor;
             });
@@ -169,12 +170,12 @@ class EntityParser extends Parser
         });
     }
 
-    _parseEntity(entityNode, {animations, textures})
+    parseEntity(entityNode, {animations, textures})
     {
         const type = entityNode.getAttribute('type');
         const source = entityNode.getAttribute('source');
 
-        const constructor = this._getConstructor(type, source);
+        const constructor = this.getConstructor(type, source);
         const entityId = entityNode.getAttribute('id');
 
         const blueprint = {
@@ -193,7 +194,7 @@ class EntityParser extends Parser
                 obj[k] = v;
                 return obj;
             }, {}),
-            traits: null,
+            traits: [],
         };
 
         const geometryNodes = entityNode.getElementsByTagName('geometry');
@@ -225,24 +226,22 @@ class EntityParser extends Parser
         }
 
         return Promise.all([
-            this._parseEntityAnimationRouter(entityNode).then(router => {
+            this.parseEntityAnimationRouter(entityNode).then(router => {
                 if (router) {
                     blueprint.animationRouter = router;
                 }
             }),
-            this._parseEntityCollision(entityNode).then(collision => {
+            this.parseEntityCollision(entityNode).then(collision => {
                 blueprint.collision = collision;
             }),
-            this._parseEntityAudio(entityNode).then(audio => {
+            this.parseEntityAudio(entityNode).then(audio => {
                 blueprint.audio = audio;
             }),
-            this._parseEntityEvents(entityNode).then(events => {
+            this.parseEntityEvents(entityNode).then(events => {
                 blueprint.events = events;
             }),
-            this._parseEntityTraits(entityNode).then(traits => {
-                blueprint.traits = traits;
-            }),
-            this._parseEntitySequences(entityNode).then(sequences => {
+            this.parseEntityTraits(entityNode, blueprint),
+            this.parseEntitySequences(entityNode).then(sequences => {
                 blueprint.sequences = sequences;
             }),
         ]).then(() => {
@@ -250,7 +249,7 @@ class EntityParser extends Parser
         });
     }
 
-    _parseEntityAnimationRouter(entityNode)
+    parseEntityAnimationRouter(entityNode)
     {
         const node = entityNode.getElementsByTagName('animation-router')[0];
         if (node) {
@@ -263,7 +262,7 @@ class EntityParser extends Parser
         return Promise.resolve(null);
     }
 
-    _parseEntityAudio(entityNode) {
+    parseEntityAudio(entityNode) {
         const tasks = [];
         const audioDef = {};
         const audioNodes = entityNode.querySelectorAll('audio > *');
@@ -280,7 +279,7 @@ class EntityParser extends Parser
         });
     }
 
-    _parseEntityCollision(entityNode) {
+    parseEntityCollision(entityNode) {
         const collisionZones = [];
         const collisionNode = entityNode.getElementsByTagName('collision')[0];
         if (collisionNode) {
@@ -303,7 +302,7 @@ class EntityParser extends Parser
         return Promise.resolve(collisionZones);
     }
 
-    _parseEntityEvents(entityNode) {
+    parseEntityEvents(entityNode) {
         ensure(entityNode, 'entity');
 
         const eventsNode = entityNode.querySelector('events');
@@ -316,20 +315,15 @@ class EntityParser extends Parser
         }
     }
 
-    _parseEntityTraits(entityNode) {
-        const traits = [];
-        const traitParser = new TraitParser(this.loader);
-        const traitsNode = entityNode.getElementsByTagName('traits')[0];
-        if (traitsNode) {
-            const traitNodes = traitsNode.getElementsByTagName('trait');
-            for (let traitNode, i = 0; traitNode = traitNodes[i++];) {
-                traits.push(traitParser.parseTrait(traitNode));
-            }
-        }
-        return Promise.resolve(traits);
+    parseEntityTraits(node, blueprint) {
+        const traitsNodes = children(node, 'traits');
+        [...traitsNodes].forEach(node => {
+            const traits = this.traitParser.parseTraits(node);
+            blueprint.traits.push(...traits);
+        });
     }
 
-    _parseEntitySequences(entityNode) {
+    parseEntitySequences(entityNode) {
         const parser = new SequenceParser();
         const node = entityNode.querySelector('sequences');
         if (node) {
@@ -340,7 +334,7 @@ class EntityParser extends Parser
         }
     }
 
-    _parseTextures(node, {textures}) {
+    parseTextures(node, {textures}) {
         const nodes = node.querySelectorAll('textures > texture');
         for (let node, i = 0; node = nodes[i++];) {
             const textureId = node.getAttribute('id') || DEFAULT;

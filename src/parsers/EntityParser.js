@@ -55,7 +55,7 @@ class EntityParser extends Parser
     }
 
     createConstructor(blueprint) {
-        if (!blueprint.textures[DEFAULT]) {
+        if (!blueprint.textures.has(DEFAULT)) {
             console.warn('No default texture on blueprint', blueprint.id);
         }
 
@@ -64,7 +64,7 @@ class EntityParser extends Parser
                 this.geometry = blueprint.geometries[0].clone();
                 this.material = new MeshPhongMaterial({
                     depthWrite: false,
-                    map: this.textures[DEFAULT] && this.textures[DEFAULT].texture,
+                    map: this.textures.has(DEFAULT) && this.textures.get(DEFAULT).texture,
                     side: DoubleSide,
                     transparent: true,
                 });
@@ -180,6 +180,7 @@ class EntityParser extends Parser
         const entityId = entityNode.getAttribute('id');
 
         const blueprint = {
+            textures,
             id: entityId,
             constructor: constructor,
             audio: null,
@@ -191,10 +192,6 @@ class EntityParser extends Parser
             events: null,
             geometries: [],
             sequences: null,
-            textures: [...textures].reduce((obj, [k, v]) => {
-                obj[k] = v;
-                return obj;
-            }, {}),
             traits: [],
         };
 
@@ -221,8 +218,12 @@ class EntityParser extends Parser
             const font = node.getAttribute('font');
             const string = node.textContent;
             const text = this.loader.resourceManager.get('font', font)(string);
+
             blueprint.geometries.push(text.getGeometry());
-            blueprint.textures = {__default: {texture: text.getTexture()}};
+            blueprint.textures = new Map().set(DEFAULT, {
+                id: entityId,
+                texture: text.getTexture(),
+            });
         }
 
         return Promise.all([

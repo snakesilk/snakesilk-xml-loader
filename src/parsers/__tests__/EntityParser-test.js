@@ -120,9 +120,10 @@ describe('EntityParser', () => {
         });
 
         describe('Animations', () => {
-          it.skip('have correct UV maps', () => {
+          it('have correct UV maps', () => {
+            console.log();
             const uvs = instance.animations['idle'].getValue(0);
-            expect(uvs).to.be.an(UVCoords);
+            expect(uvs).to.be.an(Array);
             expect(uvs[0][0].x).to.equal(0);
             expect(uvs[0][0].y).to.equal(1);
             expect(uvs[0][1].x).to.equal(0);

@@ -63,17 +63,19 @@ class EntityParser extends Parser
             console.warn('No default texture on blueprint', blueprint.id);
         }
 
-        return this.createNamedFunction(blueprint.id,
-                                        function EntityConstructor() {
-            const entity = new blueprint.constructor();
-            entity.name = blueprint.id;
+        return this.createObject(blueprint.id,
+                                 blueprint.constructor,
+                                 function EntityConstructor() {
+            blueprint.constructor.call(this);
 
-            Object.assign(entity.audio, blueprint.audio);
-            copyMap(blueprint.animations, entity.animations);
-            copyMap(blueprint.textures, entity.textures);
+            this.name = blueprint.id;
+
+            Object.assign(this.audio, blueprint.audio);
+            copyMap(blueprint.animations, this.animations);
+            copyMap(blueprint.textures, this.textures);
 
             if (blueprint.animationRouter !== undefined) {
-                entity.routeAnimation = blueprint.animationRouter;
+                this.routeAnimation = blueprint.animationRouter;
             }
 
             if (blueprint.geometries.length) {
@@ -88,40 +90,38 @@ class EntityParser extends Parser
                     })
                 );
 
-                entity.setModel(model);
-                entity.useTexture(DEFAULT);
+                this.setModel(model);
+                this.useTexture(DEFAULT);
 
                 blueprint.animators.forEach(anim => {
                     const animator = anim.clone();
                     animator.addGeometry(geometry);
-                    entity.animators.push(animator);
+                    this.animators.push(animator);
                 });
             }
 
             blueprint.collision.forEach(coll => {
                 if (coll.r) {
-                    entity.addCollisionZone(coll.r, coll.x, coll.y);
+                    this.addCollisionZone(coll.r, coll.x, coll.y);
                 } else {
-                    entity.addCollisionRect(coll.w, coll.h, coll.x, coll.y);
+                    this.addCollisionRect(coll.w, coll.h, coll.x, coll.y);
                 }
             });
 
             blueprint.traits.forEach(Trait => {
-                entity.applyTrait(new Trait());
+                this.applyTrait(new Trait());
             });
 
             blueprint.events.forEach(event => {
-                entity.events.bind(event.name, event.callback);
+                this.events.bind(event.name, event.callback);
             });
 
             blueprint.sequences.forEach(seq => {
-                entity.sequencer.addSequence(seq.id, seq.sequence);
+                this.sequencer.addSequence(seq.id, seq.sequence);
             });
 
             /* Run initial update of all UV maps. */
-            entity.updateAnimators(0);
-
-            return entity;
+            this.updateAnimators(0);
         });
     }
 

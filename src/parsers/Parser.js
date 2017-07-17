@@ -31,10 +31,14 @@ class Parser
     }
     createObject(name, ext, func)
     {
-        const fnName = name.replace(/-/g, '');
-        const object = renameFunction(fnName, func);
+        const object = this.createNamedFunction(name, func);
         extend(object, ext);
         return object;
+    }
+    createNamedFunction(name, func)
+    {
+        const fnName = name.replace(/-/g, '');
+        return renameFunction(fnName, func);
     }
     getArray(nodes, attr)
     {

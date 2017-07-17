@@ -1,4 +1,4 @@
-const {Vector2, DoubleSide, MeshPhongMaterial} = require('three');
+const {Vector2, DoubleSide, Mesh, MeshPhongMaterial} = require('three');
 const {Animation, UVAnimator, Entity, UVCoords} = require('@snakesilk/engine');
 
 const {children, ensure, find} = require('../util/traverse');
@@ -10,6 +10,10 @@ const SequenceParser = require('./SequenceParser');
 const TraitParser = require('./TraitParser');
 
 const DEFAULT = '__default';
+
+function copyMap(a, b) {
+    a.forEach((v, k) => b.set(k, v));
+}
 
 class Context {
     constructor() {
@@ -59,60 +63,66 @@ class EntityParser extends Parser
             console.warn('No default texture on blueprint', blueprint.id);
         }
 
-        const constructor = this.createObject(blueprint.id, blueprint.constructor, function objectConstructor() {
+        return this.createNamedFunction(blueprint.id,
+                                        function EntityConstructor() {
+            const entity = new blueprint.constructor();
+            entity.name = blueprint.id;
+
+            Object.assign(entity.audio, blueprint.audio);
+            copyMap(blueprint.animations, entity.animations);
+            copyMap(blueprint.textures, entity.textures);
+
+            if (blueprint.animationRouter !== undefined) {
+                entity.routeAnimation = blueprint.animationRouter;
+            }
+
             if (blueprint.geometries.length) {
-                this.geometry = blueprint.geometries[0].clone();
-                this.material = new MeshPhongMaterial({
-                    depthWrite: false,
-                    map: this.textures.has(DEFAULT) && this.textures.get(DEFAULT).texture,
-                    side: DoubleSide,
-                    transparent: true,
+                const geometry = blueprint.geometries[0].clone();
+
+                const model = new Mesh(
+                    geometry,
+                    new MeshPhongMaterial({
+                        depthWrite: false,
+                        side: DoubleSide,
+                        transparent: true,
+                    })
+                );
+
+                entity.setModel(model);
+                entity.useTexture(DEFAULT);
+
+                blueprint.animators.forEach(anim => {
+                    const animator = anim.clone();
+                    animator.addGeometry(geometry);
+                    entity.animators.push(animator);
                 });
             }
 
-            blueprint.constructor.call(this);
-
-            this.name = blueprint.id;
-
-            blueprint.traits.forEach(Trait => {
-                this.applyTrait(new Trait());
-            });
-
-            blueprint.animators.forEach(anim => {
-                const animator = anim.clone();
-                animator.addGeometry(this.geometry);
-                this.animators.push(animator);
-            });
-
             blueprint.collision.forEach(coll => {
                 if (coll.r) {
-                    this.addCollisionZone(coll.r, coll.x, coll.y);
+                    entity.addCollisionZone(coll.r, coll.x, coll.y);
                 } else {
-                    this.addCollisionRect(coll.w, coll.h, coll.x, coll.y);
+                    entity.addCollisionRect(coll.w, coll.h, coll.x, coll.y);
                 }
             });
 
+            blueprint.traits.forEach(Trait => {
+                entity.applyTrait(new Trait());
+            });
+
             blueprint.events.forEach(event => {
-                this.events.bind(event.name, event.callback);
+                entity.events.bind(event.name, event.callback);
             });
 
             blueprint.sequences.forEach(seq => {
-                this.sequencer.addSequence(seq.id, seq.sequence);
+                entity.sequencer.addSequence(seq.id, seq.sequence);
             });
 
             /* Run initial update of all UV maps. */
-            this.updateAnimators(0);
+            entity.updateAnimators(0);
+
+            return entity;
         });
-
-        constructor.prototype.animations = blueprint.animations;
-        constructor.prototype.audio = blueprint.audio;
-        constructor.prototype.textures = blueprint.textures;
-
-        if (blueprint.animationRouter !== undefined) {
-            constructor.prototype.routeAnimation = blueprint.animationRouter;
-        }
-
-        return constructor;
     }
 
     getConstructor(type, source) {

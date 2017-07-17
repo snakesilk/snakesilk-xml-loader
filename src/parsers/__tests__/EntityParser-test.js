@@ -132,7 +132,6 @@ describe('EntityParser', () => {
 
         describe('Animations', () => {
           it('have correct UV maps', () => {
-            console.log();
             const uvs = instance.animations.get('idle').getValue(0);
             expect(uvs).to.be.an(Array);
             expect(uvs[0][0].x).to.equal(0);

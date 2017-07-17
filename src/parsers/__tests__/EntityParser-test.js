@@ -78,6 +78,10 @@ describe('EntityParser', () => {
           expect(instance).to.be.an(Entity);
         });
 
+        it('can be checked if it is an instance of', () => {
+          expect(instance).to.be.a(candidate.constructor);
+        });
+
         it('contains animation router', () => {
           expect(instance.routeAnimation).to.be.a(Function);
           expect(instance.routeAnimation()).to.be('test-value-is-fubar');

@@ -3,8 +3,14 @@ const THREE = require('three');
 const CanvasUtil = require('@snakesilk/engine/dist/CanvasUtil');
 
 function renameFunction(name, fn) {
-    return (new Function("return function (call) { return function " + name +
-        " () { return call(this, arguments) }; };")())(Function.apply.bind(fn));
+    const fnName = name.replace(/-/g, '');
+    return (new Function(`
+        return function (call) {
+            return function ${fnName}() {
+                return call(this, arguments);
+            };
+        };
+    `)())(Function.apply.bind(fn));
 }
 
 function extend(child, parent, props) {
@@ -37,8 +43,7 @@ class Parser
     }
     createNamedFunction(name, func)
     {
-        const fnName = name.replace(/-/g, '');
-        return renameFunction(fnName, func);
+        return renameFunction(name, func);
     }
     getArray(nodes, attr)
     {

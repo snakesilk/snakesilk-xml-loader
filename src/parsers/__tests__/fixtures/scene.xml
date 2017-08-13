@@ -25,6 +25,8 @@
         </path>
     </camera>
 
+    <gravity x="1" y="9.81"/>
+
     <entities>
         <textures>
             <texture id="heatman-stage" url="./heatman/tiles.png" w="256" h="128"/>

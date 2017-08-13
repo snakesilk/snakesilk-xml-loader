@@ -175,6 +175,12 @@ describe('SceneParser', () => {
           });
         });
 
+        it('parses gravity as Vector3', () => {
+          expect(scene.world.gravityForce.x).to.be(1);
+          expect(scene.world.gravityForce.y).to.be(9.81);
+          expect(scene.world.gravityForce.z).to.be(0);
+        });
+
         describe('Audio', () => {
           it('was parsed', (done) => {
             scene.audio.events.bind(scene.audio.EVENT_PLAY, (audio) => {

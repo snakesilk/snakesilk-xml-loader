@@ -219,7 +219,7 @@ class SceneParser extends Parser
     _parseGravity(node, {scene}) {
         const gravityNode = children(node, 'gravity')[0];
         if (gravityNode) {
-            const gravity = this.getVector2(gravityNode);
+            const gravity = this.getVector3(gravityNode);
             scene.world.gravityForce.copy(gravity);
         }
     }

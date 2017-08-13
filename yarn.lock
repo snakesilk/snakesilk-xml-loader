@@ -2,23 +2,18 @@
 # yarn lockfile v1
 
 
-"@snakesilk/engine@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.10.0.tgz#56e3afd35c998d0a960c11a979148a3f0781b19f"
+"@snakesilk/engine@>=0.13.0", "@snakesilk/engine@>=0.8.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.13.0.tgz#1844c30d8026bc647b4fa33a124ba958fbc0ce95"
   dependencies:
     three "0.70"
 
-"@snakesilk/engine@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.8.0.tgz#a8444690de26c3c3420a1cca952a3edb5038619a"
+"@snakesilk/platform-traits@>=0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/platform-traits/-/platform-traits-0.5.0.tgz#db9034f36646bdc3f44360cea444e8f4061861a9"
   dependencies:
+    "@snakesilk/engine" ">=0.8.0"
     three "0.70"
-
-"@snakesilk/platform-traits@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@snakesilk/platform-traits/-/platform-traits-0.1.1.tgz#6f9bc305f4097751346d26593ab7e1a79f15ce6e"
-  dependencies:
-    "@snakesilk/engine" "^0.10.0"
 
 "@snakesilk/testing@^0.2.1":
   version "0.2.1"

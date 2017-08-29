@@ -77,7 +77,7 @@ class Context {
 
 class SceneParser extends Parser
 {
-    constructor(loader, node) {
+    constructor(loader) {
         super(loader);
         this.cameraParser = new CameraParser(loader);
         this.entityParser = new EntityParser(loader);

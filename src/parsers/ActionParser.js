@@ -19,7 +19,7 @@ class ActionParser extends Parser
             conditions.push(values);
         }
 
-        const callback = this._resolveFunction(node);
+        const callback = this.resolveFunction(node);
 
         if (conditions.length > 0) {
             const wrapper = function() {
@@ -151,7 +151,7 @@ class ActionParser extends Parser
         }
     }
 
-    _resolveFunction(node) {
+    resolveFunction(node) {
         const type = this.getAttr(node, 'type');
 
         if (type === 'camera-move') {
@@ -179,7 +179,7 @@ class ActionParser extends Parser
         } else if (type === 'play-sequence') {
             const id = this.getAttr(node, 'id');
             return function playSequence() {
-                return this.sequencer.playSequence(id);
+                this.sequencer.playSequence(id);
             };
         } else if (type === 'set-animation') {
             const id = this.getAttr(node, 'id');

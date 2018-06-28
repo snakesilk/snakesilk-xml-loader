@@ -4,7 +4,7 @@ const mocks = require('@snakesilk/testing/mocks');
 const {createNode, readXMLFile} = require('@snakesilk/testing/xml');
 
 const {Texture} = require('three');
-const {Animation, Entity, Loader, Objects, Trait, UVCoords} = require('@snakesilk/engine');
+const {Animation, BitmapFont, Entity, Loader, Objects, Trait, UVCoords} = require('@snakesilk/engine');
 const EntityParser = require('../EntityParser');
 
 const {createFakeTraitFactory} = require('./helpers');
@@ -26,6 +26,7 @@ describe('EntityParser', () => {
 
   describe('#getObjects', () => {
     const MOCK_CANVAS = new mocks.Canvas();
+    const MOCK_FONT = new BitmapFont.Text(undefined, {x: 20, y: 10}, {x: 40, y: 20});
     let node, objects;
 
     before(() => {
@@ -34,6 +35,8 @@ describe('EntityParser', () => {
 
     beforeEach(() => {
       mocks.Image.mock();
+
+      loader.resourceManager.addFont('mock-font', sinon.stub().returns(MOCK_FONT));
 
       sinon.stub(loader.resourceLoader, 'loadImage', () => {
         return Promise.resolve(MOCK_CANVAS)
@@ -50,6 +53,14 @@ describe('EntityParser', () => {
     it('returns an object indexed by object names', () => {
       expect(objects).to.be.an(Object);
       expect(objects).to.have.property('GIJoe');
+    });
+
+    it('initializes font with text from node', () => {
+      return loader.resourceManager.get('font', 'mock-font')
+      .then(font => {
+        expect(font.callCount).to.be(1);
+        expect(font.lastCall.args).to.eql(['Hola Bandola']);
+      });
     });
 
     describe('parsed candidate', () => {
@@ -199,6 +210,22 @@ describe('EntityParser', () => {
             expect(instance.textures.get('__default').texture.image).to.be(MOCK_CANVAS);
           });
         });
+      });
+    });
+
+    describe('parsed text mesh', () => {
+      let text;
+
+      beforeEach(() => {
+        text = objects['TextEntity'];
+      });
+
+      it('contains reference to parsed node', () => {
+        expect(text.node).to.be(node.querySelector('entity[id=TextEntity]'));
+      });
+
+      it('containes a constructor for object', () => {
+        expect(text.constructor).to.be.a(Function);
       });
     });
   });

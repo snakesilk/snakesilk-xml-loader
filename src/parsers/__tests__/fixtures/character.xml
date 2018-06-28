@@ -17,6 +17,10 @@
         </animation-router>
     </entity>
 
+    <entity id="TextEntity">
+        <text font="mock-font">Hola Bandola</text>
+    </entity>
+
     <animations w="48" h="48" texture="megaman-p">
         <animation id="idle">
             <frame x="0" y="0" duration="3.85" />

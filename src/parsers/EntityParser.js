@@ -204,38 +204,8 @@ class EntityParser extends Parser
             traits: [],
         };
 
-        const geometryNodes = entityNode.getElementsByTagName('geometry');
-        const textNodes = entityNode.getElementsByTagName('text');
-        if (geometryNodes.length) {
-            for (let i = 0, geometryNode; geometryNode = geometryNodes[i]; ++i) {
-                const geometry = this.getGeometry(geometryNode);
-                blueprint.geometries.push(geometry);
-
-                const faceNodes = geometryNode.getElementsByTagName('face');
-                const animators = this.faceParser.parseAnimators(faceNodes, animations);
-
-                if (animators.length) {
-                    blueprint.animators.push(...animators);
-                } else if(animations.has(DEFAULT)) {
-                    const animator = new UVAnimator();
-                    animator.setAnimation(animations.get(DEFAULT));
-                    blueprint.animators.push(animator);
-                }
-            }
-        } else if (textNodes.length) {
-            const node = textNodes[0];
-            const font = node.getAttribute('font');
-            const string = node.textContent;
-            const text = this.loader.resourceManager.get('font', font)(string);
-
-            blueprint.geometries.push(text.getGeometry());
-            blueprint.textures = new Map().set(DEFAULT, {
-                id: entityId,
-                texture: text.getTexture(),
-            });
-        }
-
         return Promise.all([
+            this.parseGeometry(entityNode, blueprint),
             this.parseEntityAnimationRouter(entityNode).then(router => {
                 if (router) {
                     blueprint.animationRouter = router;
@@ -341,6 +311,46 @@ class EntityParser extends Parser
             return Promise.resolve(sequences);
         } else {
             return Promise.resolve([]);
+        }
+    }
+
+    parseGeometry(entityNode, blueprint) {
+        const geometryNodes = entityNode.getElementsByTagName('geometry');
+        if (geometryNodes.length) {
+            const animations = blueprint.animations;
+            for (let i = 0, geometryNode; geometryNode = geometryNodes[i]; ++i) {
+                const geometry = this.getGeometry(geometryNode);
+                blueprint.geometries.push(geometry);
+
+                const faceNodes = geometryNode.getElementsByTagName('face');
+                const animators = this.faceParser.parseAnimators(faceNodes, animations);
+
+                if (animators.length) {
+                    blueprint.animators.push(...animators);
+                } else if(animations.has(DEFAULT)) {
+                    const animator = new UVAnimator();
+                    animator.setAnimation(animations.get(DEFAULT));
+                    blueprint.animators.push(animator);
+                }
+            }
+            return;
+        }
+
+        const textNodes = entityNode.getElementsByTagName('text');
+        if (textNodes.length) {
+            const node = textNodes[0];
+            const font = node.getAttribute('font');
+            const string = node.textContent;
+            return this.loader.resourceManager.get('font', font)
+            .then(textFactory => {
+                const text = textFactory(string);
+
+                blueprint.geometries.push(text.getGeometry());
+                blueprint.textures = new Map().set(DEFAULT, {
+                    id: blueprint.id,
+                    texture: text.getTexture(),
+                });
+            });
         }
     }
 

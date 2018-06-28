@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@snakesilk/engine@>=0.13.0", "@snakesilk/engine@>=0.8.0":
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.13.0.tgz#1844c30d8026bc647b4fa33a124ba958fbc0ce95"
+"@snakesilk/engine@>=0.14.0", "@snakesilk/engine@>=0.8.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.14.0.tgz#8bc68e09ad48cb5ee4e9d3970d5ee5e3ace04f03"
   dependencies:
     three "0.70"
 

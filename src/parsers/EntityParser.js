@@ -286,21 +286,20 @@ class EntityParser extends Parser
         ensure(entityNode, 'entity');
 
         const eventsNode = entityNode.querySelector('events');
-        if (eventsNode) {
-            return this.eventParser.getEvents(eventsNode)
-            .then(({events}) => events);
-        }
-        else {
-            return Promise.resolve([]);
-        }
+        return Promise.resolve(eventsNode
+            ? this.eventParser.getEvents(eventsNode)
+                .then(({events}) => events)
+            : []);
     }
 
     parseEntityTraits(node, blueprint) {
         const traitsNodes = children(node, 'traits');
-        [...traitsNodes].forEach(node => {
-            const traits = this.traitParser.parseTraits(node);
-            blueprint.traits.push(...traits);
-        });
+        return Promise.all([...traitsNodes].map(node => {
+            return this.traitParser.parseTraits(node)
+            .then(traits => {
+                blueprint.traits.push(...traits);
+            });
+        }));
     }
 
     parseEntitySequences(entityNode) {

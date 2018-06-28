@@ -88,7 +88,10 @@ describe('TraitParser', () => {
           <test/>
         </traits>`);
 
-        result = parser.parseTraits(node);
+        return parser.parseTraits(node)
+        .then(r => {
+          result = r;
+        });
       });
 
       it('calls #parseTrait for every child node', () => {
@@ -97,7 +100,7 @@ describe('TraitParser', () => {
         expect(parser.parseTrait.getCall(1).args[0]).to.be(node.children[1]);
       });
 
-      it('returns all return values from #parseTrait', () => {
+      it('resolves all return values from #parseTrait', () => {
         expect(result[0]).to.be('result a');
         expect(result[1]).to.be('result b');
       });
@@ -121,10 +124,13 @@ describe('TraitParser', () => {
               'my-trait': factory,
             });
             node = createNode(xml);
-            constructor = parser.parseTrait(node);
+            return parser.parseTrait(node)
+            .then(c => {
+              constructor = c;
+            });
           });
 
-          it('returns constructor created by factory', () => {
+          it('resolves constructor created by factory', () => {
             expect(constructor).to.be(MOCK_CONSTRUCTOR);
           });
 

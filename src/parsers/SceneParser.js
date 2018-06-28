@@ -55,21 +55,24 @@ class Context {
     }
 
     createEntity(id) {
-        return new (this.getEntity(id)).constructor();
+        return this.getEntity(id)
+        .then(entity => {
+            return new entity.constructor();
+        });
     }
 
     getEntity(id) {
-
         if (this.entities.has(id)) {
-            return this.entities.get(id);
+            return Promise.resolve(this.entities.get(id));
         }
 
         const resources = this.loader.resourceManager;
-        if (resources.has('entity', id)) {
+        return resources.get('entity', id)
+        .then(entity => {
             return {
-                constructor: resources.get('entity', id),
+                constructor: entity
             };
-        }
+        });
 
         throw new Error(`Entity "${id}" not defined.`);
     }
@@ -226,49 +229,58 @@ class SceneParser extends Parser
 
     _parseLayout(node, context) {
         const {scene, layoutObjects} = context;
-        const entityNodes = find(node, 'layout > entities > entity');
         const world = scene.world;
-        for (let entityNode, i = 0; entityNode = entityNodes[i]; ++i) {
-            const layoutObject = this._parseLayoutObject(entityNode, context);
-            world.addObject(layoutObject.instance);
-            layoutObjects.push(layoutObject);
-        }
+        const entityNodes = find(node, 'layout > entities > entity');
+        return Promise.all(entityNodes.map(entityNode => {
+            return this._parseLayoutObject(entityNode, context)
+            .then(layoutObject => {
+                world.addObject(layoutObject.instance);
+                layoutObjects.push(layoutObject);
+            });
+        }));
     }
 
     _parseLayoutObject(node, context) {
         const entityId = node.getAttribute('id');
-        const entity = context.getEntity(entityId);
-        const instanceId = node.getAttribute('instance-id');
-        const instance = context.createEntity(entityId);
-        instance.id = instanceId;
-
-        const direction = this.getInt(node, 'dir') || 1;
-        const position = this.getPosition(node) || DEFAULT_POS;
-
-        instance.direction.set(direction, 0);
-        instance.position.copy(position);
-
-        if (instance.model) {
-            const scale = this.getFloat(node, 'scale') || 1;
-            instance.model.scale.multiplyScalar(scale);
-        }
-
         const traitNodes = node.getElementsByTagName('trait');
-        if (traitNodes) {
-            const traits = [];
-            for (let traitNode, i = 0; traitNode = traitNodes[i++];) {
-                const Trait = this.traitParser.parseTrait(traitNode);
-                const trait = new Trait;
+
+        return Promise.all([
+            context.createEntity(entityId),
+            context.getEntity(entityId),
+            Promise.all([...traitNodes].map(traitNode => {
+                return this.traitParser.parseTrait(traitNode);
+            })),
+        ])
+        .then(([
+            instance,
+            entity,
+            traits,
+        ]) => {
+            const instanceId = node.getAttribute('instance-id');
+            const direction = this.getInt(node, 'dir') || 1;
+            const position = this.getPosition(node) || DEFAULT_POS;
+
+            instance.id = instanceId;
+            instance.direction.set(direction, 0);
+            instance.position.copy(position);
+
+            if (instance.model) {
+                const scale = this.getFloat(node, 'scale') || 1;
+                instance.model.scale.multiplyScalar(scale);
+            }
+
+            for (const Trait of traits) {
+                const trait = new Trait();
                 instance.applyTrait(trait);
             }
-        }
 
-        return {
-            sourceNode: entity.node,
-            node: node,
-            constructor: entity.constructor,
-            instance: instance,
-        };
+            return {
+                sourceNode: entity.node,
+                node: node,
+                constructor: entity.constructor,
+                instance: instance,
+            };
+        });
     }
 
     _parseObjects(node, context) {

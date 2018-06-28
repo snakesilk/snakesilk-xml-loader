@@ -45,14 +45,14 @@ class TraitParser extends Parser
         if (!factory) {
             throw new TypeError(`Trait factory "${name}" does not exist.`);
         }
-        return factory(this, node);
+        return Promise.resolve(factory(this, node));
     }
 
     parseTraits(node) {
         ensure(node, 'traits');
-        return [...node.children].map(node => {
+        return Promise.all([...node.children].map(node => {
             return this.parseTrait(node);
-        });
+        }));
     }
 }
 

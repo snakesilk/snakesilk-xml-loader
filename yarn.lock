@@ -2,18 +2,15 @@
 # yarn lockfile v1
 
 
-"@snakesilk/engine@>=0.14.0", "@snakesilk/engine@>=0.8.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-0.14.0.tgz#8bc68e09ad48cb5ee4e9d3970d5ee5e3ace04f03"
-  dependencies:
-    three "0.70"
+"@snakesilk/engine@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/engine/-/engine-1.0.0.tgz#217a8819fb66b911ba3e12b838b106a82800932b"
+  integrity sha512-LmoHHQFELftS4vlN7XZRHrp7dkBj5myg3iTnGQVW69VE1tQnn758/EcH4zJGYhGB26YDBhelSmFP0prqsJffwg==
 
-"@snakesilk/platform-traits@>=0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@snakesilk/platform-traits/-/platform-traits-0.5.0.tgz#db9034f36646bdc3f44360cea444e8f4061861a9"
-  dependencies:
-    "@snakesilk/engine" ">=0.8.0"
-    three "0.70"
+"@snakesilk/platform-traits@>=0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@snakesilk/platform-traits/-/platform-traits-0.6.0.tgz#63fb8c36343db7b1fb0ac21b74fb681b4a456516"
+  integrity sha512-cnm7oPMcQUR/QDss/d3F0b4MvcdBRvakhGhMJfTdJ55j6ddcf2cdu3Q67a7E6EZGG8nOggxWEGZECZsztyi8ow==
 
 "@snakesilk/testing@^0.2.1":
   version "0.2.1"
